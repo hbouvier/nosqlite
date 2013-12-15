@@ -1,0 +1,16 @@
+.body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+.grayedout {
+    opacity : .50;
+    cursor : default;
+    color : LightGray; /* IE<9 */    /* filter : alpha(opacity=50); -- does not work on IE8  */
+    pointer-events: none;
+}
+.normal {
+    cursor : default;
+}
+.breadcrumb-nav {
+    margin : .5em;
+}

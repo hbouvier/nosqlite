@@ -1,0 +1,20 @@
+<div class="container" ng-controller="DatabasesCtrl">
+    <div class="row"> 
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <th>Database</th>
+                    <th>Buckets</th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="database in databases">
+                        <td><a href="#databases/{{database.name}}">{{database.name}}</a></td>
+                        <td>{{database.buckets.length}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>

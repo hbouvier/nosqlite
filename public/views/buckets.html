@@ -1,0 +1,18 @@
+<div class="container" ng-controller="BucketsCtrl">
+    <div class="row"> 
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <th>Buckets</th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="bucket in buckets">
+                        <td><a href="#databases/{{database}}/{{bucket}}">{{bucket}}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>

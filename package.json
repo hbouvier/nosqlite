@@ -1,0 +1,45 @@
+{
+    "author"      : "Henri Bouvier",
+    "name"        : "nosqlite",
+    "description" : "A nosql light database",
+    "version"     : "0.0.1",
+    "repository"  : {
+        "type" : "git",
+        "url"  : "https://github.com/hbouvier/nosqlite.git"
+    },
+    "keywords": [
+        "nosql",
+        "database",
+        "json"
+    ],
+    "main" : "./lib/nosqlite.js",
+    "bin"  : {
+        "nosqlited" : "./bin/nosqlited"
+    },
+    "dependencies"         : {
+        "q"       : "latest",
+        "express" : "latest",
+        "connect" : "latest",
+        "sqlite3" : "latest",
+        "winston" : "latest",
+        "node-uuid" : "latest",
+        "node-options" : "latest"
+    },
+    "devDependencies": {
+        "jasmine-node": "latest"
+    },    
+    "engines"              : {
+        "node" : ">= 0.10.0 < 0.11.0"
+    },
+    "scripts": {
+        "start": "bin/nosqlited",
+        "test" : "jasmine-node --verbose spec",
+        "autotest" : "jasmine-node --autotest spec"
+    },
+    "configuration"        : {
+        "name"    : "nosqlited",
+        "level"   : "debug",
+        "context" : "/nosqlite/v1",
+        "port"    : 3000
+    }
+}
