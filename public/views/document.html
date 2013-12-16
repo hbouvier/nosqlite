@@ -3,8 +3,7 @@
         <div class="col-md-1"></div>
         <br>
         <div class="panel panel-default">
-            <div class="panel-body">
-            
+            <div ng-show="fields.length" class="panel-body">
                 <form class="form-horizontal" role="form">
                     <div ng-repeat="field in fields" class="form-group">
                         <label class="col-sm-2 control-label">{{field.key}}</label>
@@ -15,6 +14,22 @@
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                         <button ng-click="save()" type="submit" class="btn btn-default">Save</button>
+                        </div>
+                    </div>
+                </form>        
+            </div>
+            <div ng-hide="fields.length" class="panel-body">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">KEY</label>
+                        <div class="col-sm-10">
+                            <input ng-model="documentKEY" type="text" class="form-control">
+                            <textarea ng-model="documentJSON" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                        <button ng-click="create()" type="submit" class="btn btn-default">Save</button>
                         </div>
                     </div>
                 </form>        

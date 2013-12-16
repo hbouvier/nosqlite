@@ -2,6 +2,22 @@
     <div class="row"> 
         <div class="col-md-1"></div>
         <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div>
+                        <h3 class="panel-title">Buckets</h3>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form class="form-inline" role="form">
+                        <div class="form-group">
+                            <label class="sr-only" for="bucketName">Bucket Name</label>
+                            <input ng-model="bucketName" type="text" class="form-control" id="bucketName" placeholder="Bucket Name">
+                        </div>
+                        <button type="submit" ng-click="create(bucketName)" class="btn btn-default">Create</button>
+                    </form>
+                </div>
+            </div>
             <table class="table table-bordered table-hover">
                 <thead>
                     <th>Buckets</th>

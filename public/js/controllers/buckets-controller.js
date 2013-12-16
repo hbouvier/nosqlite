@@ -1,17 +1,18 @@
 angular.module('nosqliteBucketsControllers', ['nosqliteServices'])
 .controller('BucketsCtrl', function($scope, $routeParams, $http, breadcrumbsService) {
     var baseURL = '/nosqlite/v1';
+    $scope.buckets = [];
     
-        breadcrumbsService.set('breadcrumbsID', [
-            {
-                href: '#/databases/',
-                label: 'Databases'
-            },
-            {
-                href: '#/databases/' + $scope.database,
-                label: $scope.database
-            }
-        ]);
+    breadcrumbsService.set('breadcrumbsID', [
+        {
+            href: '#/databases/',
+            label: 'Databases'
+        },
+        {
+            href: '#/databases/' + $scope.database,
+            label: $scope.database
+        }
+    ]);
     $scope.database = $routeParams.database;
     $http( {
             method: 'GET',
@@ -23,4 +24,19 @@ angular.module('nosqliteBucketsControllers', ['nosqliteServices'])
     error(function(data, status, headers, config) {
         $scope.buckets = [];
     });
+    
+    $scope.create = function (name) {
+        $http( {
+                method: 'POST',
+                url: encodeURI(baseURL + '/' + $scope.database + '/' + name)
+        }).
+        success(function(data, status, headers, config) {
+            $scope.buckets.push(name);
+        }).
+        error(function(data, status, headers, config) {
+        });
+    };
+    
+    
+    
 });

@@ -21,7 +21,6 @@ angular.module('nosqliteDocumentsControllers', ['nosqliteServices'])
         }
     ]);
 
-
     $scope.find = function (id) {
         $http( {
             method: 'GET',

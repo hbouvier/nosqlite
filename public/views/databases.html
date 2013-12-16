@@ -2,6 +2,22 @@
     <div class="row"> 
         <div class="col-md-1"></div>
         <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div>
+                        <h3 class="panel-title">Databases</h3>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form class="form-inline" role="form">
+                        <div class="form-group">
+                            <label class="sr-only" for="databaseName">Database Name</label>
+                            <input ng-model="databaseName" type="text" class="form-control" id="databaseName" placeholder="Database Name">
+                        </div>
+                        <button type="submit" ng-click="create(databaseName)" class="btn btn-default">Create</button>
+                    </form>
+                </div>
+            </div>
             <table class="table table-bordered table-hover">
                 <thead>
                     <th>Database</th>
@@ -15,6 +31,7 @@
                 </tbody>
             </table>
         </div>
+        
         <div class="col-md-1"></div>
     </div>
 </div>
