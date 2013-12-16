@@ -1,7 +1,12 @@
-angular.module('nosqliteBreadcrumbsControllers', [])
+angular.module('nosqliteBreadcrumbsControllers', []) // breadcrumbsService
 .controller('BreadcrumbsCtrl', function($scope, $http) {
     $scope.busy = true;
     $scope.searchText = '';
-    $scope.breadcrumbs = ["Databases"];
+    /*
+    breadcrumbsService.push("home", {
+        href: '#/',
+        label: 'Home'
+    });
+    */
 })
 ;

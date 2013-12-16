@@ -10,7 +10,6 @@
                     </div>
                 </div>
                 <div class="panel-body">
-        
                     <form class="form-inline" role="form">
                         <div class="form-group">
                             <label class="sr-only" for="key">Key</label>
@@ -23,18 +22,22 @@
                     <table ng-show="documents.length" class="table table-striped table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>Key</th>
-                                <th ng-repeat="(name, value) in documents[0].value">
-                                    {{name}}
+                                <th>Document</th>
+                                <!--
+                                <th ng-repeat="(key, value) in documents[0].value">
+                                    {{key}}
                                 </th>
+                                -->
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="document in documents | objectFilter:searchText">
-                                <td>{{document.key}}</td>
+                                <td><a href="/#databases/{{database}}/{{bucket}}/{{document.key}}">{{document.key}}</a></td>
+                                <!--
                                 <td ng-repeat="(name, value) in document.value">
                                     {{value}}
                                 </td>
+                                -->
                             </tr>
                         </tbody>
                     </table>

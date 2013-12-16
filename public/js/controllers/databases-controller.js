@@ -5,7 +5,7 @@ angular.module('nosqliteControllers', [])
     
     $http( {
             method: 'GET',
-            url: baseURL
+            url: encodeURI(baseURL)
     }).
     success(function(data, status, headers, config) {
         data.databases.forEach(function(database){
@@ -14,7 +14,7 @@ angular.module('nosqliteControllers', [])
             };
             $http( {
                     method: 'GET',
-                    url: baseURL + '/' + database
+                    url: encodeURI(baseURL + '/' + database)
             }).
             success(function(data, status, headers, config) {
                 $scope.databases[database].buckets = data.buckets;
