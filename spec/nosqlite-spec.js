@@ -1,8 +1,9 @@
 // spec/nosqlite-spec.js
-var NoSqlite = require('../lib/nosqlite');
-var QHelper = require('./Qhelper');
+var libpath = process.env['NOSQLITE_COVERAGE'] ? '../lib-cov' : '../lib',
+    NoSqlite = require(libpath + '/nosqlite'),
+    QHelper  = require('./Qhelper');
 
-
+console.log('Loading ' + libpath + ' libraries');
 describe("Testing an in Memory Database Life cycle", function () {
     
     var database = new NoSqlite({level:'warn', journal:false});

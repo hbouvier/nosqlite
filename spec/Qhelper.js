@@ -1,23 +1,31 @@
 module.exports = function () {
-    var Q = require('q');
+    var Q     = require('q'),
+        debug = false;
     
     function proxy(promise, message, expectations, timeout) {
-        var pending = true;
-        timeout = timeout || 5000;
+        var pending   = true,
+            state     = 'pending',
+            timestamp = process.hrtime();
+        
+        timeout     = timeout || 1000,
         
         promise.then(function (result) {
+            state   = 'fufilled';
             pending = false;
             expectations('fulfilled', result);
         }, function (reason) {
             pending = false;
+            state   = 'rejected';
             expectations('rejected', reason);
         });
 
         waitsFor(function () {
-            return promise.isPending() === false;
+            return pending === false;
         }, message, timeout);
 
         runs(function () {
+            var elapsedhr = process.hrtime(timestamp);
+            if (debug) console.log(state + ' in ' + elapsedhr[0] + 's ' + (elapsedhr[1] / 1000000).toFixed(3) + 'ms');
             if (pending) {
                 expectations('pending');
             }
