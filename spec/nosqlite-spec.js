@@ -1,12 +1,13 @@
 // spec/nosqlite-spec.js
 var libpath = process.env['NOSQLITE_COVERAGE'] ? '../lib-cov' : '../lib',
     NoSqlite = require(libpath + '/nosqlite'),
-    QHelper  = require('./Qhelper');
+    QHelper  = require('./Qhelper'),
+    level    = 'debug';
 
 console.log('Loading ' + libpath + ' libraries');
 describe("Testing an in Memory Database Life cycle", function () {
     
-    var database = new NoSqlite({level:'warn', journal:false});
+    var database = new NoSqlite({level:level, journal:false});
     it('Openning the Memory Database', function () {
         QHelper(database.open(), "Waiting for the database to be openned", function (state) {
            expect(state).toBe('fulfilled'); 
@@ -22,7 +23,7 @@ describe("Testing an in Memory Database Life cycle", function () {
 
 describe("Testing a Bucket Life cycle", function () {
     
-    var database   = new NoSqlite({level:'warn', journal:false});
+    var database   = new NoSqlite({level:level, journal:false});
     var bucketName = 'bilbucket';
 
     it('Openning the Memory Database', function () {
@@ -46,7 +47,9 @@ describe("Testing a Bucket Life cycle", function () {
         QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result).toEqual(keyValue);
+           expect(result.key).toBe(keyValue.key);
+           expect(result.meta.rev).not.toBeNull();
+           expect(result.value).toBe(keyValue.value);
         });
     });
     
@@ -76,7 +79,7 @@ describe("Testing a Bucket Life cycle", function () {
 
 describe("Testing Key.Value pair Life Cycle", function () {
     
-    var database   = new NoSqlite({level:'warn', journal:false});
+    var database   = new NoSqlite({level:level, journal:false});
     var bucketName = 'Users';
 
     it('Openning the Memory Database', function () {
@@ -102,7 +105,9 @@ describe("Testing Key.Value pair Life Cycle", function () {
         QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result).toEqual(keyValue);
+           expect(result.key).toEqual(keyValue.key);
+           expect(result.value).toEqual(keyValue.value);
+           expect(result.meta.rev).not.toBeNull();
         });
     });
     
@@ -110,7 +115,9 @@ describe("Testing Key.Value pair Life Cycle", function () {
         QHelper(database.bucket(bucketName).get(keyValue.key), 'Waiting for Key/Value pair to be Retreived', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result).toEqual(keyValue.value);
+           expect(result.key).toEqual(keyValue.key);
+           expect(result.value).toEqual(keyValue.value);
+           expect(result.meta.rev).not.toBeNull();
         });
     });
     
@@ -118,7 +125,10 @@ describe("Testing Key.Value pair Life Cycle", function () {
         QHelper(database.bucket(bucketName).set(keyValue.key, valueModified), 'Waiting for key/value pair to be changed', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result).toEqual({key:keyValue.key, value:valueModified});
+           
+           expect(result.key).toEqual(keyValue.key);
+           expect(result.value).toEqual(valueModified);
+           expect(result.meta.rev).not.toBeNull();
         });
     });
 
