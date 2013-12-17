@@ -1,4 +1,4 @@
-angular.module('nosqliteApplication', ['nosqliteServices', 'nosqliteBreadcrumbsControllers','nosqliteControllers', 'nosqliteBucketsControllers','nosqliteDocumentsControllers', 'nosqliteDocumentControllers'])
+angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers', 'nosqliteBucketsControllers','nosqliteDocumentsControllers', 'nosqliteDocumentControllers'])
 .config(['$httpProvider', function($httpProvider) {
     delete $httpProvider.defaults.headers.common["X-Requested-With"];
 }])

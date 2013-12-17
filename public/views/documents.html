@@ -34,7 +34,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="document in documents | objectFilter:searchText">
-                                <td><a href="/#databases/{{database}}/{{bucket}}/{{document.key}}">{{document.key}}</a></td>
+                                <td><a href="/#databases/{{database}}/{{bucket}}/{{document.key}}">{{document.key.id}}</a></td>
                                 <!--
                                 <td ng-repeat="(name, value) in document.value">
                                     {{value}}

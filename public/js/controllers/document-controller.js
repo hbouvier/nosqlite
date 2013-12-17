@@ -1,5 +1,5 @@
 angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
-.controller('DocumentCtrl', function($scope, $routeParams, $http, breadcrumbsService) {
+.controller('DocumentCtrl', function($scope, $routeParams, $http, $location, breadcrumbsService) {
     var baseURL = '/nosqlite/v1';
     $scope.database   = $routeParams.database;
     $scope.bucket     = $routeParams.bucket;
@@ -11,21 +11,25 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
     $scope.documentJSON = '';
 
     $scope.save = function () {
+        $scope.document = {key:{},value:{}};
         for (var i = 0 ; i < $scope.fields.length ; ++i) {
-            $scope.document[$scope.fields[i].key] = $scope.fields[i].value;
+            console.log('$scope.document['+$scope.fields[i].group+']['+$scope.fields[i].key+'] = '+$scope.fields[i].value);
+            $scope.document[$scope.fields[i].group][$scope.fields[i].key] = $scope.fields[i].value;
         }
-        
-        
+        $scope.documentId = $scope.document.key;
+        console.log('ID:', $scope.documentId , ', ', $scope.document.key);
+        console.log('doc:', $scope.document);
         $http( {
             method: 'PUT',
-            url: encodeURI(baseURL + '/' + $scope.database + '/' + $scope.bucket + '/' + $scope.documentId),
+            url: encodeURI(baseURL + '/' + $scope.database + '/' + $scope.bucket + '/' + JSON.stringify($scope.documentId)),
             headers: {
                 'Content-type': 'application/json'
             },
-            data : $scope.document
+            data : $scope.document.value
         }).
         success(function(data, status, headers, config) {
-            alert('SAVED');
+            console.log('url:', encodeURI('/#/databases/' + $scope.database + '/' + $scope.bucket + '/' + JSON.stringify(data.key)));
+            $location.path('/databases/' + $scope.database + '/' + $scope.bucket + '/' + JSON.stringify(data.key));
         }).
         error(function(data, status, headers, config) {
             alert('ERROR');
@@ -59,9 +63,14 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
     success(function(data, status, headers, config) {
         $scope.document = data;
         $scope.fields   = [];
-        for (var name in $scope.document) {
-            if ($scope.document.hasOwnProperty(name)) {
-                $scope.fields.push({key:name, value:$scope.document[name]});
+        for (var name in $scope.document.key) {
+            if ($scope.document.key.hasOwnProperty(name)) {
+                $scope.fields.push({group:'key', key:name, value:$scope.document.key[name]});
+            }
+        }
+        for (name in $scope.document.value) {
+            if ($scope.document.value.hasOwnProperty(name)) {
+                $scope.fields.push({group:'value', key:name, value:$scope.document.value[name]});
             }
         }
     }).
@@ -79,15 +88,25 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
                     data : obj
             }).
             success(function(data, status, headers, config) {
-                $scope.documentId = $scope.documentKEY;
-                $scope.document = JSON.parse($scope.documentJSON);
+                $scope.documentId = data.key;
+                $scope.document = data;
+                $location.path('/databases/' + $scope.database + '/' + $scope.bucket + '/' + JSON.stringify(data.key));
+                /*
+                $scope.documentId = data.key;
+                $scope.document = data;
                 $scope.fields   = [];
-                for (var name in $scope.document) {
-                    if ($scope.document.hasOwnProperty(name)) {
-                        $scope.fields.push({key:name, value:$scope.document[name]});
+                for (var name in $scope.document.key) {
+                    if ($scope.document.key.hasOwnProperty(name)) {
+                        $scope.fields.push({group:'key', key:name, value:$scope.document.key[name]});
+                    }
+                }
+                for (name in $scope.document.value) {
+                    if ($scope.document.value.hasOwnProperty(name)) {
+                        $scope.fields.push({group:'value', key:name, value:$scope.document.value[name]});
                     }
                 }
                 updateBreadcrumbs();
+                */
             }).
             error(function(data, status, headers, config) {
             });

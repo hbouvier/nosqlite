@@ -47,8 +47,8 @@ describe("Testing a Bucket Life cycle", function () {
         QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result.key).toBe(keyValue.key);
-           expect(result.meta.rev).not.toBeNull();
+           expect(result.key.id).toBe(keyValue.key);
+           expect(result.key.rev).not.toBeNull();
            expect(result.value).toBe(keyValue.value);
         });
     });
@@ -105,9 +105,9 @@ describe("Testing Key.Value pair Life Cycle", function () {
         QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result.key).toEqual(keyValue.key);
+           expect(result.key.id).toEqual(keyValue.key);
+           expect(result.key.rev).not.toBeNull();
            expect(result.value).toEqual(keyValue.value);
-           expect(result.meta.rev).not.toBeNull();
         });
     });
     
@@ -115,9 +115,9 @@ describe("Testing Key.Value pair Life Cycle", function () {
         QHelper(database.bucket(bucketName).get(keyValue.key), 'Waiting for Key/Value pair to be Retreived', function (state, result) {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
-           expect(result.key).toEqual(keyValue.key);
+           expect(result.key.id).toEqual(keyValue.key);
+           expect(result.key.rev).not.toBeNull();
            expect(result.value).toEqual(keyValue.value);
-           expect(result.meta.rev).not.toBeNull();
         });
     });
     
@@ -126,9 +126,9 @@ describe("Testing Key.Value pair Life Cycle", function () {
            expect(state).toBe('fulfilled');
            expect(result).not.toBeNull();
            
-           expect(result.key).toEqual(keyValue.key);
+           expect(result.key.id).toEqual(keyValue.key);
+           expect(result.key.rev).not.toBeNull();
            expect(result.value).toEqual(valueModified);
-           expect(result.meta.rev).not.toBeNull();
         });
     });
 
