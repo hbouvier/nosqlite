@@ -29,16 +29,21 @@
         "jasmine-node": "latest",
         "istanbul": "latest",
         "jscoverage" : "latest",
-        "jscoverage-reporter" : "latest"
-    },    
+        "jscoverage-reporter" : "latest",
+        "complexity-report" : "latest",
+        "jslint" : "latest"
+    },
     "engines"              : {
         "node" : ">= 0.10.0 < 0.11.0"
     },
     "scripts": {
         "start": "bin/nosqlited",
-        "test" : "jscoverage lib lib-cov ;istanbul cover jasmine-node -- spec",
+        "test" : "istanbul cover jasmine-node -- spec && cr --maxcc 15 lib/nosqlite.js",
         "verbose-test" : "jasmine-node --verbose spec",
-        "autotest" : "jasmine-node --autotest spec --watch ."
+        "autotest" : "jasmine-node --autotest spec --watch .",
+        "lint"     : "jslint lib/*",
+        "complex": "cr --maxcc 15 lib/nosqlite.js",
+        "clean" : "rm -rf coverage lib-cov"
     },
     "configuration"        : {
         "name"    : "nosqlited",

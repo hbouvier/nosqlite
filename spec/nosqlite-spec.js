@@ -1,166 +1,415 @@
 // spec/nosqlite-spec.js
-var libpath = process.env['NOSQLITE_COVERAGE'] ? '../lib-cov' : '../lib',
+var libpath = process.env.NOSQLITE_COVERAGE ? '../lib-cov' : '../lib',
     NoSqlite = require(libpath + '/nosqlite'),
     QHelper  = require('./Qhelper'),
-    level    = 'debug';
+    uuid     = require('node-uuid'),
+    level    = process.env.NOSQLITE_LEVEL ? process.env.NOSQLITE_LEVEL : 'error';
 
 console.log('Loading ' + libpath + ' libraries');
-describe("Testing an in Memory Database Life cycle", function () {
-    
-    var database = new NoSqlite({level:level, journal:false});
-    it('Openning the Memory Database', function () {
-        QHelper(database.open(), "Waiting for the database to be openned", function (state) {
-           expect(state).toBe('fulfilled'); 
-        });
-    });
-    
-    it('Closing the Memory Database', function () {
-        QHelper(database.close(), "Waiting for the database to be closed", function (state) {
-           expect(state).toBe('fulfilled'); 
-        });
-    });
-});
 
-describe("Testing a Bucket Life cycle", function () {
-    
-    var database   = new NoSqlite({level:level, journal:false});
-    var bucketName = 'bilbucket';
+var testDatabaseImplementation = [
+    {name: "Memory" , filename:null},
+    {name: "Disk"   , filename:"testdb"}
+];
 
-    it('Openning the Memory Database', function () {
-        QHelper(database.open(), "Waiting for the database to be openned", function (state) {
-           expect(state).toBe('fulfilled'); 
-        });
-    });
-    
-    ////////////////////////////////////////////////////////////////////////////
-    it('Creating ' + bucketName + ' Bucket', function () {
-        QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
-           expect(state).toBe('fulfilled');
-           expect(bucket).not.toBeNull();
-           expect(bucket.db).not.toBeNull();
-           expect(bucket.getName()).toBe(bucketName);
-        });        
-    });
+for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
 
-    var keyValue      = {key:"key", value:"value"};
-    it('Creating a key/value pair in the new bucket', function () {
-        QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
-           expect(state).toBe('fulfilled');
-           expect(result).not.toBeNull();
-           expect(result.key.id).toBe(keyValue.key);
-           expect(result.key.rev).not.toBeNull();
-           expect(result.value).toBe(keyValue.value);
-        });
-    });
-    
-    it('Destroying ' + bucketName + ' Bucket', function () {
-       QHelper(database.drop(bucketName), 'Waiting for the bucket to be destroyed', function (state) {
-           expect(state).toBe('fulfilled');
-        });
-    });
-    
-    it('Retreiving a key/value pair from a destroyed bucket bucket', function () {
-        QHelper(database.bucket(bucketName).get(keyValue.key), 'Waiting for key/value pair retreival to fail', function (state, result) {
-           expect(state).toBe('rejected');
-           expect(result).toEqual({ errno : 1, code : 'SQLITE_ERROR' });
-        });
-    });
-    
-    ////////////////////////////////////////////////////////////////////////////
-    
-    it('Closing the Memory Database', function () {
-        QHelper(database.close(), "Waiting for the database to be closed", function (state) {
-           expect(state).toBe('fulfilled'); 
-        });
-    });
-});
+    /////////////////////// DATABASE LIFE CYCLE ////////////////////////////
 
+    describe('Testing a ' + testDatabaseImplementation[index].name + ' Database Life cycle', function () {
 
+        var database = new NoSqlite(testDatabaseImplementation[index].filename, {level:level, journal:false});
 
-describe("Testing Key.Value pair Life Cycle", function () {
-    
-    var database   = new NoSqlite({level:level, journal:false});
-    var bucketName = 'Users';
+        // Test out of sycn API calls for Database life cycle
+        //
+        it('Expect closing an unopenned Database to be rejected', function () {
+            QHelper(database.close(), "Waiting for the database to be closed", function (state) {
+               expect(state).toBe('rejected');
+            });
+        });
+        it('Expect deleting an unopenned Database to be rejected', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('rejected');
+            });
+        });
 
-    it('Openning the Memory Database', function () {
-        QHelper(database.open(), "Waiting for the database to be openned", function (state) {
-           expect(state).toBe('fulfilled'); 
+        // Normal API calls
+        it('Expect openning the Database to succeed', function () {
+            QHelper(database.open(), "Waiting for the database to be openned", function (state) {
+               expect(state).toBe('fulfilled');
+            });
         });
-    });
-    
-    it('Creating ' + bucketName + ' Bucket', function () {
-        QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
-           expect(state).toBe('fulfilled');
-           expect(bucket).not.toBeNull();
-           expect(bucket.db).not.toBeNull();
-           expect(bucket.getName()).toBe(bucketName);
-        });        
-    });
-    
-    ////////////////////////////////////////////////////////////////////////////
-    var keyValue      = {key:"user::00001", value:{firstname:"Bob", lastname:"Dole"}},
-        valueModified = {firstname:"Boby"};
-    
-    it('Creating a new key/value pair', function () {
-        QHelper(database.bucket(bucketName).set(keyValue.key, keyValue.value), 'Waiting for key/value pair to be stored', function (state, result) {
-           expect(state).toBe('fulfilled');
-           expect(result).not.toBeNull();
-           expect(result.key.id).toEqual(keyValue.key);
-           expect(result.key.rev).not.toBeNull();
-           expect(result.value).toEqual(keyValue.value);
+
+        // Invalid API call
+        it('Expect Deleting an openned database to be rejected', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('rejected');
+            });
         });
-    });
-    
-    it('Retreiving the key/value pair', function () {
-        QHelper(database.bucket(bucketName).get(keyValue.key), 'Waiting for Key/Value pair to be Retreived', function (state, result) {
-           expect(state).toBe('fulfilled');
-           expect(result).not.toBeNull();
-           expect(result.key.id).toEqual(keyValue.key);
-           expect(result.key.rev).not.toBeNull();
-           expect(result.value).toEqual(keyValue.value);
+
+        // Back to normal sequence
+        it('Expect Closing a Database to succeed', function () {
+            QHelper(database.close(), "Waiting for the database to be closed", function (state) {
+               expect(state).toBe('fulfilled');
+            });
         });
-    });
-    
-    it('Modifying an existing key/value pair', function () {
-        QHelper(database.bucket(bucketName).set(keyValue.key, valueModified), 'Waiting for key/value pair to be changed', function (state, result) {
-           expect(state).toBe('fulfilled');
-           expect(result).not.toBeNull();
-           
-           expect(result.key.id).toEqual(keyValue.key);
-           expect(result.key.rev).not.toBeNull();
-           expect(result.value).toEqual(valueModified);
+        it('Expect Deleting a closed Database to succeed', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        // Invalid API call
+        it('Expect Deleting an already deleted Database to be rejected', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('rejected');
+            });
+        });
+
+        it('Expect Closing an already closed Database to be rejected', function () {
+            QHelper(database.close(), "Waiting for the database to be closed", function (state) {
+               expect(state).toBe('rejected');
+            });
         });
     });
 
-    it('Deleting the modified Key/Value Pair', function () {
-        QHelper(database.bucket(bucketName).del(keyValue.key), 'Waiting for Key/Value pair to be Deleted', function (state) {
-           expect(state).toBe('fulfilled');
-        });
-    });
-    
-    it('Retreiving an NONE-existing KeyValue pair', function () {
-       QHelper(database.bucket(bucketName).get(keyValue.key), 'Waiting for key/value to fail Retrieval', function (state, result) {
-           expect(state).toBe('fulfilled');
-           expect(result).toBeNull();
-        });
-    });
-    
-    
-    ////////////////////////////////////////////////////////////////////////////
-    
-    it('Destroying ' + bucketName + ' Bucket', function () {
-       QHelper(database.drop('bucket'), 'Waiting for the bucket to be destroyed', function (state) {
-           expect(state).toBe('fulfilled');
-        });
-    });
-    
-    it('Closing the Memory Database', function () {
-        QHelper(database.close(), "Waiting for the database to be closed", function (state) {
-           expect(state).toBe('fulfilled'); 
-        });
-    });
-});
+    /////////////////////// BUCKET LIFE CYCLE ////////////////////////////
 
+
+    describe('Testing a Bucket Life cycle within a ' + testDatabaseImplementation[index].name + ' Database', function () {
+
+        var database   = new NoSqlite(testDatabaseImplementation[index].filename, {level:level, journal:false});
+        var bucketName = 'bilbucket';
+
+        // Out of sequence API Calls
+        it('Expect Creating bucket ' + bucketName + ' for an unopenned database to be rejected', function () {
+            QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, err, bucket) {
+               expect(state).toBe('rejected');
+               expect(err).not.toBeNull();
+               expect(bucket).toBeUndefined();
+            });
+        });
+
+        it('Expect destroying bucket ' + bucketName + ' for an unopenned database to be rejected', function () {
+           QHelper(database.drop(bucketName), 'Waiting for the bucket to be destroyed', function (state) {
+               expect(state).toBe('rejected');
+            });
+        });
+
+        // Starting normal call flow
+        it('Expect openning the Database to succeed', function () {
+            QHelper(database.open(), "Waiting for the database to be openned", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        it('Expect creating bucket ' + bucketName + ' to succeed', function () {
+            QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
+               expect(state).toBe('fulfilled');
+               expect(bucket).not.toBeNull();
+               expect(bucket.db).not.toBeNull();
+               expect(bucket.getName()).toBe(bucketName);
+            });
+        });
+
+        var document = {key:"This is the Key of the Document", value : {doc : "This is a long text", author : "me, myself and I"}};
+        var rev = uuid.v1();
+
+        it('Expect creating a document  to success', function () {
+            QHelper(database.bucket(bucketName).set(document.key, document.value), 'Waiting for key/value pair to be stored', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result.key.id).toBe(keyValue.key);
+               expect(result.key.rev).toBeGreaterThan(rev); // "rev" is a time UUID, therefore it should be greater than the one we have created before calling "set()"
+               expect(result.value).toBe(keyValue.value);
+            });
+        });
+
+        it('Expect creating bucket ' + bucketName + ' that already exist to succeed anyway', function () {
+            QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
+               expect(state).toBe('fulfilled');
+               expect(bucket).not.toBeNull();
+               expect(bucket.db).not.toBeNull();
+               expect(bucket.getName()).toBe(bucketName);
+            });
+        });
+
+        it('Expect destroying bucket ' + bucketName + ' to succeed', function () {
+           QHelper(database.drop(bucketName), 'Waiting for the bucket to be destroyed', function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        it('Expect destroying bucket ' + bucketName + ' again, to succeed anyway', function () {
+           QHelper(database.drop(bucketName), 'Waiting for the bucket to be destroyed', function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        // Invalid call
+        it('Expect retreiving the document from the destroyed bucket to be rejected', function () {
+            QHelper(database.bucket(bucketName).get(document.key), 'Waiting for key/value pair retreival to fail', function (state, result) {
+               expect(state).toBe('rejected');
+               expect(result).toEqual({ errno : 1, code : 'SQLITE_ERROR' });
+            });
+        });
+
+        // Clean up
+        it('Expect Closing the Database to succeed', function () {
+            QHelper(database.close(), "Waiting for the database to be closed", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+        it('Expect Deleting the closed Database to succeed', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+    });
+
+    /////////////////////// DOCUMENT LIFE CYCLE ////////////////////////////
+
+    describe('Testing Documents Life cycle within a ' + testDatabaseImplementation[index].name + ' Database', function () {
+
+        var database   = new NoSqlite(testDatabaseImplementation[index].filename, {level:level, journal:false});
+        var bucketName = 'Users';
+        var bucket   = database.bucket(bucketName);
+        var partialKey = "u::0001",
+            exactKey    = {id : partialKey, rev:uuid.v1()},
+            originalDoc = {firstname:"John",   lastname:"Do"},
+            firstModif  = {firstname:"John",   lastname:"Smith"},
+            secondModif = {firstname:"Granny", lastname:"Smith"},
+            document    = {key:exactKey,       value:originalDoc},
+            staleDoc    = document;
+
+        // Invalid API calls
+        it('Expect creating a document before openning the Database to be rejected', function () {
+            QHelper(bucket.set(partialKey, originalDoc), 'Waiting for the document to be stored', function (state, result) {
+               expect(state).toBe('rejected');
+               expect(result).not.toBeNull();
+            });
+        });
+
+        // Normal call flow
+        it('Expect Openning the Database to succeed', function () {
+            QHelper(database.open(), "Waiting for the database to be openned", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        // Invalid call
+        it('Expect creating a document before the bucket creation to be rejected', function () {
+            QHelper(bucket.set(partialKey, originalDoc), 'Waiting for the document to be stored', function (state, result) {
+               expect(state).toBe('rejected');
+               expect(result).not.toBeNull();
+            });
+        });
+
+        // Back to normal
+        it('Expect Creating the bucket ' + bucketName + ' to succedd', function () {
+            QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
+               expect(state).toBe('fulfilled');
+               expect(bucket).not.toBeNull();
+               expect(bucket.db).not.toBeNull();
+               expect(bucket.getName()).toBe(bucketName);
+            });
+        });
+
+        // We create the document, the API will return a revision number (for optimistic locking)
+        it('Expect creating a document to succeed', function () {
+            QHelper(bucket.set(document.key.id, document.value), 'Waiting for the document to be stored', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result.key.id).toEqual(document.key.id);
+               expect(result.key.rev).toBeGreaterThan(document.key.rev);  // A new rev has been generated (time uuid)
+               expect(result.value).toEqual(document.value);
+               staleDoc = document;
+               document = result;
+            });
+        });
+
+        // Fetch that exact document using the ID and Revision
+        it('Expect Retreiving document with the id and the revision to succeed', function () {
+            QHelper(bucket.get(document.key), 'Waiting for document to be Retreived', function (state, result) {
+//            console.log("234:key=", document.key, ', result:', result);
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result).toEqual(document);
+            });
+        });
+
+        // Fetch with only the ID (any revision)
+        it('Expect Retreiving document with the id only to succeed', function () {
+            QHelper(bucket.get(document.key.id), 'Waiting for document to be Retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result).toEqual(document);
+            });
+        });
+
+        // Modifying the exact document using ID and revision
+        it('Expect modifying the document using the revision to succeed', function () {
+            QHelper(bucket.set(document.key, firstModif), 'Waiting for document to be changed', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+
+               expect(result.key.id).toEqual(document.key.id);
+               expect(result.key.rev).toBeGreaterThan(document.key.rev); // A new rev has been generated
+               expect(result.value).toEqual(firstModif);
+               staleDoc = document;
+               document = result;
+            });
+        });
+
+        // Modifying the stale document using the id and revision
+        it('Expect modifying the stale document using the id and revision to be rejected', function () {
+            QHelper(bucket.set(staleDoc.key, secondModif), 'Waiting for document to be changed', function (state, result) {
+               expect(state).toBe('rejected');
+            });
+        });
+
+        // Fetching the latest version of the document using only the ID (any revision)
+        it('Expect Retreiving document with the id only to succeed', function () {
+            QHelper(bucket.get(document.key.id), 'Waiting for document to be Retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result).toEqual(document);
+            });
+        });
+
+        // Modifying the stale document using the only the id
+        it('Expect modifying the stale document using the id only to succeed', function () {
+            QHelper(bucket.set(staleDoc.key.id, secondModif), 'Waiting for document to be changed', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).not.toBeNull();
+               expect(result.key.id).toEqual(staleDoc.key.id);
+               expect(result.key.rev).toBeGreaterThan(staleDoc.key.rev); // newer than the stale doc
+               expect(result.key.rev).toBeGreaterThan(document.key.rev); // newer than the original doc
+               expect(result.value).toEqual(secondModif);
+               staleDoc = document;
+               document = result;
+            });
+        });
+
+
+
+        // Deleting the document using the exact id and revision
+        it('Expect Deleting the modified feteched document using the revision to succeed', function () {
+            QHelper(bucket.del(document.key), 'Waiting for document to be Deleted', function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        it('Expecting Retreiving a NONE-existing document using the revision to succeed with a null value', function () {
+           QHelper(bucket.get(document.key), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).toBeNull();
+            });
+        });
+
+        it('Expecting Retreiving a NONE-existing document using only the id to succeed with a null value', function () {
+           QHelper(bucket.get(document.key.id), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result).toBeNull();
+            });
+        });
+
+
+        it('Expecting creating an empty document to succeed', function () {
+           QHelper(bucket.set("simple_document_empty", {}), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toEqual({});
+            });
+        });
+
+        it('Expecting creating a string to succeed', function () {
+           QHelper(bucket.set("simple_string","Hello World"), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe("Hello World");
+            });
+        });
+        it('Expecting creating an empty string to succeed', function () {
+           QHelper(bucket.set("simple_string_empty",""), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe("");
+            });
+        });
+        it('Expecting creating an integer to succeed', function () {
+           QHelper(bucket.set("simple_integer", 42), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(42);
+            });
+        });
+        it('Expecting creating an integer with 0 to succeed', function () {
+           QHelper(bucket.set("simple_integer_zero", 0), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(0);
+            });
+        });
+        it('Expecting creating a real to succeed', function () {
+           QHelper(bucket.set("simple_float", 3.1416), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(3.1416);
+            });
+        });
+        it('Expecting creating a real with 0.0 to succeed', function () {
+           QHelper(bucket.set("simple_float_zero", 0.0), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(0.0);
+            });
+        });
+
+        it('Expecting creating a boolean true to succeed', function () {
+           QHelper(bucket.set("simple_boolean_true", true), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(true);
+            });
+        });
+        it('Expecting creating a boolean false to succeed', function () {
+           QHelper(bucket.set("simple_boolean_false", false), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toBe(false);
+            });
+        });
+
+        it('Expecting to fetch all the simple document to succeed', function () {
+           QHelper(bucket.get("simple_*", {exact:false, limit:100, offset:0}), 'Waiting for document be retreived', function (state, rows) {
+               expect(state).toBe('fulfilled');
+               expect(rows.length).toBe(9);
+               expoct(rows[0].value).toEqual({});
+               expect(rows[0].value).toBe("Hello World");
+               expect(rows[0].value).toBe("");
+               expect(rows[0].value).toBe(42);
+               expect(rows[0].value).toBe(0);
+               expect(rows[0].value).toBe(3.1416);
+               expect(rows[0].value).toBe(0.0);
+               expect(rows[0].value).toBe(true);
+               expect(rows[0].value).toBe(false);
+            });
+        });
+
+
+
+        ////////////////////////////////////////////////////////////////////////////
+
+        it('Expect Destroying bucket ' + bucketName + ' to succeed', function () {
+           QHelper(database.drop('bucket'), 'Waiting for the bucket to be destroyed', function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+
+        it('Expect Closing the Database to succeed', function () {
+            QHelper(database.close(), "Waiting for the database to be closed", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+        it('Expect destroying the Database to succeed', function () {
+            QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
+               expect(state).toBe('fulfilled');
+            });
+        });
+    });
+}
 
 
 
