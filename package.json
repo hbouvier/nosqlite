@@ -2,7 +2,7 @@
     "author"      : "Henri Bouvier",
     "name"        : "nosqlited",
     "description" : "A nosql light database",
-    "version"     : "0.0.2",
+    "version"     : "0.0.3",
     "repository"  : {
         "type" : "git",
         "url"  : "https://github.com/hbouvier/nosqlite.git"
