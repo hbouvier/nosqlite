@@ -1,10 +1,9 @@
-nosqlite
+NoSQLiteD [![Build Status](https://travis-ci.org/hbouvier/nosqlite.png)](https://travis-ci.org/hbouvier/nosqlite)
 ========
 
-# A simple nosql implementation
+# Yet another NoSQL implementation
 
-
-This module can be installed as a REST server or embeded as a module.
+This NoSQL database can be embeded, as a library to your project or started as a REST Service (daemon)
 
 #LICENSE:
 
@@ -12,7 +11,7 @@ This module is licensed under the Apache License v2.0
 
 # Usage as a REST Server
 
-npm install -g nosqlite
+npm install -g nosqlited
 
 nosqlited --port=80
 
@@ -38,7 +37,7 @@ curl -X DELETE http://localhost:80/nosqlite/v1/MyDatabase/MyBucket
 # Include this as a module in your own project
 
 ## project.js
-    var NoSqlite = require('nosqlite');
+    var NoSqlite = require('nosqlited');
     var db = new NoSqlite("MyDatabase", {level:'debug', journal:false}),
     db.open().then(function () {
         return db.create('MyBucket');
@@ -46,8 +45,8 @@ curl -X DELETE http://localhost:80/nosqlite/v1/MyDatabase/MyBucket
         return bucket.set('MyKey', {firstname:'Granny', lastname:'Smith'});
     }).then(function () {
         return db.bucket('MyBucket').get('MyKey');
-    }).then(function (value) {
-        console.log('Value=', value);
+    }).then(function (document) {
+        console.log('document=', document.value);
         return db.close();
     }).then(function () {
         console.log('all is well, db closed');
