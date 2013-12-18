@@ -16,7 +16,7 @@
                             <input ng-model="id" type="text" class="form-control" id="key" placeholder="Document Key">
                         </div>
                         <button type="submit" ng-click="find(id)" class="btn btn-default">Find</button>
-                        <a class="bt bt-primary" href="/#databases/{{database}}/{{bucket}}/ new">Create</a>
+                        <a class="bt bt-primary" href="#/databases/{{database}}/{{bucket}}/ new">Create</a>
                         
                     </form>
                 </div>
@@ -34,7 +34,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="document in documents | objectFilter:searchText">
-                                <td><a href="/#databases/{{database}}/{{bucket}}/{{document.key}}">{{document.key.id}}</a></td>
+                                <td><a href="#/databases/{{database}}/{{bucket}}/{{document.key}}">{{document.key.id}}</a></td>
                                 <!--
                                 <td ng-repeat="(name, value) in document.value">
                                     {{value}}

@@ -48,7 +48,9 @@
     "configuration"        : {
         "name"    : "nosqlited",
         "level"   : "debug",
-        "context" : "/nosqlite/v1",
+        "context" : "/nosqlite",
+        "api"     : "/api/v1",
+        "ui"      : "/ui",
         "port"    : 4200
     }
 }

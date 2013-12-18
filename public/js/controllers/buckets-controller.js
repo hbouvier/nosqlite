@@ -1,6 +1,6 @@
 angular.module('nosqliteBucketsControllers', ['nosqliteServices'])
 .controller('BucketsCtrl', function($scope, $routeParams, $http, breadcrumbsService) {
-    var baseURL = '/nosqlite/v1';
+    var baseURL = '/nosqlite/api/v1';
     $scope.buckets = [];
     
     breadcrumbsService.set('breadcrumbsID', [

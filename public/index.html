@@ -51,12 +51,12 @@
 
         <!-- =================== NoSqlite CSS ===================
         -->
-        <link href="/css/nosqlite.css" rel="stylesheet">
+        <link href="css/nosqlite.css" rel="stylesheet">
         <!-- =================== NoSqlite CSS ===================
         -->
     </head>
 
-    <body class="body" xxxxxxxxng-controller="xxxxxxxxBreadcrumbsCtrl">
+    <body class="body">
         <!-- Black Title bar
         -->
         <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -72,18 +72,6 @@
                 </div>
                 <div class="collapse navbar-collapse" >
                     <ol id='breadcrumbsID' name='bcname' class="nav navbar-nav" ng-breadcrumbs>
-                <!--
-                    <ol class="nav navbar-nav">
-                        <div class="breadcrumb breadcrumb-nav">
-                            <li ng-repeat="breadcrumb in breadcrumbs" ng-if="!$last">
-                                <a href="#{{breadcrumb}}">{{breadcrumb}}</a>
-                            </li>
-                            <li class="active">
-                                {{breadcrumbs[breadcrumbs.length - 1]}}
-                            </li>
-                        </div>
-                    </ol>     
-                -->
 
                     <form class="navbar-form navbar-right" role="form">
                         <div class="form-group">
@@ -105,13 +93,12 @@
         
         <!-- Angular Controller
         -->
-        <script src="/js/application/nosqlite-application.js"></script>
-        <script src="/js/services/nosqlite-services.js"></script>
-        <!-- <script src="/js/controllers/breadcrumbs-controller.js"></script> -->
-        <script src="/js/controllers/databases-controller.js"></script>
-        <script src="/js/controllers/buckets-controller.js"></script>
-        <script src="/js/controllers/documents-controller.js"></script>
-        <script src="/js/controllers/document-controller.js"></script>
+        <script src="js/application/nosqlite-application.js"></script>
+        <script src="js/services/nosqlite-services.js"></script>
+        <script src="js/controllers/databases-controller.js"></script>
+        <script src="js/controllers/buckets-controller.js"></script>
+        <script src="js/controllers/documents-controller.js"></script>
+        <script src="js/controllers/document-controller.js"></script>
 
     </body>
 </html>

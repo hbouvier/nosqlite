@@ -1,6 +1,6 @@
 angular.module('nosqliteControllers', [])
 .controller('DatabasesCtrl', function($scope, $http) {
-    var baseURL = '/nosqlite/v1';
+    var baseURL = '/nosqlite/api/v1';
     $scope.databases = {};
     $scope.databaseName;
     

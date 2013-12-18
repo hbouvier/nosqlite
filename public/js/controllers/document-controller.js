@@ -1,6 +1,6 @@
 angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
 .controller('DocumentCtrl', function($scope, $routeParams, $http, $location, breadcrumbsService) {
-    var baseURL = '/nosqlite/v1';
+    var baseURL = '/nosqlite/api/v1';
     $scope.database   = $routeParams.database;
     $scope.bucket     = $routeParams.bucket;
     $scope.documentId = $routeParams.documentId;
