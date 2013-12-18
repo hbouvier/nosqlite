@@ -38,7 +38,8 @@ curl -X DELETE http://localhost:4200/nosqlite/v1/MyDatabase/MyBucket
 
 ## project.js
     var NoSqlite = require('nosqlited');
-    var db = new NoSqlite("MyDatabase", {level:'debug', journal:false}),
+    var db = new NoSqlite("MyDatabase", {level:'debug', journal:false});
+
     db.open().then(function () {
         return db.create('MyBucket');
     }).then(function (bucket) {
