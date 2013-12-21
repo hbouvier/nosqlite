@@ -314,6 +314,13 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expecting creating an array document to succeed', function () {
+           QHelper(bucket.set("array", [1,"string", 3.14, true]), 'Waiting for document be retreived', function (state, result) {
+               expect(state).toBe('fulfilled');
+               expect(result.value).toEqual([1,"string", 3.14, true]);
+               expect(result.value instanceof Array).toBe(true);
+            });
+        });
 
         it('Expecting creating an empty document to succeed', function () {
            QHelper(bucket.set("simple_document_empty", {}), 'Waiting for document be retreived', function (state, result) {
@@ -372,22 +379,53 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
-        it('Expecting to fetch all the simple document to succeed', function () {
+        it('Expecting to fetch all the simple documents to succeed', function () {
            QHelper(bucket.get("simple_*", {exact:false, limit:100, offset:0}), 'Waiting for document be retreived', function (state, rows) {
                expect(state).toBe('fulfilled');
                expect(rows.length).toBe(9);
-               expoct(rows[0].value).toEqual({});
-               expect(rows[0].value).toBe("Hello World");
-               expect(rows[0].value).toBe("");
-               expect(rows[0].value).toBe(42);
-               expect(rows[0].value).toBe(0);
-               expect(rows[0].value).toBe(3.1416);
-               expect(rows[0].value).toBe(0.0);
-               expect(rows[0].value).toBe(true);
-               expect(rows[0].value).toBe(false);
+               expect(rows[0].value).toEqual({});
+               expect(rows[1].value).toBe("Hello World");
+               expect(rows[2].value).toBe("");
+               expect(rows[3].value).toBe(42);
+               expect(rows[4].value).toBe(0);
+               expect(rows[5].value).toBe(3.1416);
+               expect(rows[6].value).toBe(0.0);
+               expect(rows[7].value).toBe(true);
+               expect(rows[8].value).toBe(false);
+               
+               expect(typeof(rows[0].value)).toBe("object");
+               expect(typeof(rows[1].value)).toBe("string");
+               expect(typeof(rows[2].value)).toBe("string");
+               expect(typeof(rows[3].value)).toBe("number");
+               expect(typeof(rows[4].value)).toBe("number");
+               expect(typeof(rows[5].value)).toBe("number");
+               expect(typeof(rows[6].value)).toBe("number");
+               expect(typeof(rows[7].value)).toBe("boolean");
+               expect(typeof(rows[8].value)).toBe("boolean");
+               
             });
         });
 
+        it('Expecting to fetch first five simple documents to succeed', function () {
+           QHelper(bucket.get("simple_*", {exact:false, limit:5, offset:0}), 'Waiting for document be retreived', function (state, rows) {
+               expect(state).toBe('fulfilled');
+               expect(rows.length).toBe(5);
+               expoct(rows[0].value).toEqual({});
+               expect(rows[1].value).toBe("Hello World");
+               expect(rows[2].value).toBe("");
+               expect(rows[3].value).toBe(42);
+               expect(rows[4].value).toBe(0);
+           });
+        });
+        it('Expecting to fetch last four simple documents to succeed', function () {
+           QHelper(bucket.get("simple_*", {exact:false, limit:5, offset:5}), 'Waiting for document be retreived', function (state, rows) {
+               expect(rows.length).toBe(4);
+               expect(rows[0].value).toBe(3.1416);
+               expect(rows[1].value).toBe(0.0);
+               expect(rows[2].value).toBe(true);
+               expect(rows[3].value).toBe(false);
+            });
+        });
 
 
         ////////////////////////////////////////////////////////////////////////////

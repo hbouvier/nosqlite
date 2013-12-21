@@ -43,6 +43,7 @@
         "autotest" : "jasmine-node --autotest spec --watch .",
         "lint"     : "jslint lib/*",
         "complex": "cr --maxcc 15 lib/nosqlite.js",
+        "prestine" : "rm -rf coverage lib-cov node_modules",
         "clean" : "rm -rf coverage lib-cov"
     },
     "configuration"        : {

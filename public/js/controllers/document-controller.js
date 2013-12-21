@@ -9,6 +9,8 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
     
     $scope.documentKEY  ='';
     $scope.documentJSON = '';
+    $scope.documentRev  = '';
+    $scope.documentType = 'JSON';
 
     $scope.save = function () {
         $scope.document = {key:{},value:{}};
@@ -68,9 +70,13 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
                 $scope.fields.push({group:'key', key:name, value:$scope.document.key[name]});
             }
         }
-        for (name in $scope.document.value) {
-            if ($scope.document.value.hasOwnProperty(name)) {
-                $scope.fields.push({group:'value', key:name, value:$scope.document.value[name]});
+        if (typeof($scope.document.value) === 'string' || $scope.document.value instanceof Array) {
+            $scope.fields.push({group:'value', key:null, value:$scope.document.value});
+        } else {
+            for (name in $scope.document.value) {
+                if ($scope.document.value.hasOwnProperty(name)) {
+                    $scope.fields.push({group:'value', key:name, value:$scope.document.value[name]});
+                }
             }
         }
     }).
@@ -78,14 +84,19 @@ angular.module('nosqliteDocumentControllers', ['nosqliteServices'])
         $scope.document = data;
     });
     
+    $scope.cancel = function () {
+        $location.path('/databases/' + $scope.database + '/' + $scope.bucket);
+    };
     
     $scope.create = function () {
         try {
-            var obj = JSON.parse($scope.documentJSON);
+            var obj = $scope.documentType === 'JSON' ? JSON.parse($scope.documentJSON) : $scope.documentJSON;
+            console.log('doc=', obj);
             $http( {
                     method: 'PUT',
                     url: encodeURI(baseURL + '/' + $scope.database + '/' + $scope.bucket + '/' + $scope.documentKEY),
-                    data : obj
+                    data : obj,
+                    headers: {'Content-Type': ($scope.documentType === 'JSON' ? 'application/json' : 'text/plain') + '; charset="UTF-8"'}
             }).
             success(function(data, status, headers, config) {
                 $scope.documentId = data.key;
