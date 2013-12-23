@@ -109,9 +109,7 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
             url: encodeURI($scope.baseAPIurl + '/' + $scope.bucket.databaseSelected)
         }).
         success(function(data, status, headers, config) {
-            for (var i in data.buckets) {
-                $scope.bucket.rows.push({name:data.buckets[i],count:0});
-            }
+            $scope.bucket.rows = data.buckets;
         }).
         error(function(data, status, headers, config) {
             $scope.bucket.rows = [];

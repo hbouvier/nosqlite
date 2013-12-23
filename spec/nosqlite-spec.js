@@ -190,6 +190,12 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expect counting documents before openning the Database to be rejected', function () {
+            QHelper(bucket.count("*", {exact:false}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('rejected');
+            });
+        });
+
         // Normal call flow
         it('Expect Openning the Database to succeed', function () {
             QHelper(database.open(), "Waiting for the database to be openned", function (state) {
@@ -205,13 +211,26 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expect counting documents before the bucket creation to be rejected', function () {
+            QHelper(bucket.count("*", {exact:false}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('rejected');
+            });
+        });
+
         // Back to normal
-        it('Expect Creating the bucket ' + bucketName + ' to succedd', function () {
+        it('Expect Creating the bucket ' + bucketName + ' to succeed', function () {
             QHelper(database.create(bucketName), 'Waiting for the bucket creation', function (state, bucket) {
                expect(state).toBe('fulfilled');
                expect(bucket).not.toBeNull();
                expect(bucket.db).not.toBeNull();
                expect(bucket.getName()).toBe(bucketName);
+            });
+        });
+
+        it('Expect counting documents of an empty bucket to succeed', function () {
+            QHelper(bucket.count("*", {exact:false}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('fulfilled');
+                expect(count).toBe(0);
             });
         });
 
@@ -227,6 +246,14 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
                document = result;
             });
         });
+
+        it('Expect counting documents of a bucket to succeed', function () {
+            QHelper(bucket.count("*", {exact:false}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('fulfilled');
+                expect(count).toBe(1);
+            });
+        });
+
 
         // Fetch that exact document using the ID and Revision
         it('Expect Retreiving document with the id and the revision to succeed', function () {
@@ -406,6 +433,14 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expect counting documents of a bucket to succeed', function () {
+            QHelper(bucket.count("*", {exact:false}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('fulfilled');
+                expect(count).toBe(10);
+            });
+        });
+
+
         it('Expecting to fetch first five simple documents to succeed', function () {
            QHelper(bucket.get("simple_*", {exact:false, limit:5, offset:0}), 'Waiting for document be retreived', function (state, rows) {
                expect(state).toBe('fulfilled');
@@ -417,6 +452,14 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
                expect(rows[4].value).toBe(0);
            });
         });
+
+        it('Expect counting documents of a bucket to succeed', function () {
+            QHelper(bucket.count("simple_*", {exact:false, limit:5, offset:5}), 'Waiting for the documents to be counted', function (state, count) {
+                expect(state).toBe('fulfilled');
+                expect(count).toBe(9);
+            });
+        });
+
         it('Expecting to fetch last four simple documents to succeed', function () {
            QHelper(bucket.get("simple_*", {exact:false, limit:5, offset:5}), 'Waiting for document be retreived', function (state, rows) {
                expect(rows.length).toBe(4);
