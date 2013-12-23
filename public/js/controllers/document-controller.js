@@ -239,15 +239,11 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
         };
 
 
-
-
-
         /**
          * REST call to save a document
          */
         $scope.save = function () {
             var key = typeof($scope.document.content.key) === 'object' ? JSON.stringify($scope.document.content.key) : $scope.document.content.key;
-
             $http( {
                 method: 'PUT',
                 url:  encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + key),
