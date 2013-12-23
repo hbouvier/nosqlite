@@ -1,0 +1,62 @@
+<div class="container" ng-controller="BucketCtrl">
+    <div class="row"> 
+
+        <div class="list-group">
+            <a ng-href="#{{urlBasePath}}" class="list-group-item active">
+                Buckets
+                <span class="badge">Documents</span>
+            </a>
+
+            <form class="form-inline" role="form">
+                <a ng-repeat="row in bucket.rows | objectFilter:searchText" ng-href="#{{urlBasePath}}/{{bucket.databaseSelected}}/{{row.name}}" class="list-group-item">
+                    {{row.name}}
+                    <span class="badge">{{row.count}}</span>
+                    <button type="submit" ng-click="alertOnDeleteBucket(row.name)" class="btn btn-xs btn-default rightspacer pull-right" data-toggle="modal" data-target="#deleteBucketModal">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </a>
+
+                <div ng-show="bucket.model.newRowAdded">
+                    <input ng-model="bucket.name" type="text" class="form-control" id="newBucketName" placeholder="New Bucket Name"
+                           ng-enter="create(bucket.name, false)" ng-setfocus="bucket.model.newRowAddedFocus" ng-tab="create(bucket.name, true)" ng-escape>
+                </div>
+
+                <a ng-href="#{{urlBasePath}}/{{bucket.databaseSelected}}" class="list-group-item">
+                    <div ng-hide="bucket.model.newRowAdded">
+                        <button type="submit" ng-click="addRow()" class="btn btn-sm btn-default">Add</button>
+                    </div>
+                    <div ng-show="bucket.model.newRowAdded">
+                        <button type="submit" ng-click="create(bucket.name)" class="btn btn-sm btn-default">Create</button>
+                    </div>
+
+                </a>
+            </form>
+
+
+        </div>
+    </div>
+
+    <!-- Modal Dialog Box -->
+    <div class="modal fade" id="deleteBucketModal" tabindex="-1" role="dialog" aria-labelledby="deleteBucketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="deleteBucketModalLabel">Delete Bucket</h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <b><i>"{{bucket.deleteBucketName}}"</i></b> forever and ever?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button ng-click="deleteBucket()" type="button" class="btn btn-danger">Delete it</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- The focus will be on this "hidden" field by default, if the user press ENTER, we will add a new
+         database
+    -->
+    <input style="opacity:0;width:0px;height:0px" ng-setfocus="bucket.addRowOnEnter" ng-enter="addRow()">
+</div>

@@ -1,21 +1,46 @@
-angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers', 'nosqliteBucketsControllers','nosqliteDocumentsControllers', 'nosqliteDocumentControllers'])
+var ___g_NoSQLiteRoutePrefix___ = '/home';
+angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers', 'nosqliteBucketControllers', 'nosqliteDocumentControllers'])
+.run(function($rootScope) {
+    $rootScope.baseAPIurl  = '/nosqlite/api/v1';
+    $rootScope.baseUIurl   = '/nosqlite/ui';
+    $rootScope.urlBasePath = ___g_NoSQLiteRoutePrefix___;
+    $rootScope.urlBaseLabel = 'Home';
+})
 .config(['$httpProvider', function($httpProvider) {
     delete $httpProvider.defaults.headers.common["X-Requested-With"];
 }])
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider.
-        when('/databases', {controller:'DatabasesCtrl', templateUrl:'views/databases.html'}).
-        when('/databases/:database', {controller:'BucketsCtrl', templateUrl:'views/buckets.html'}).
-        when('/databases/:database/:bucket', {controller:'DocumentsCtrl', templateUrl:'views/documents.html'}).
-        when('/databases/:database/:bucket/:documentId', {controller:'DocumentCtrl', templateUrl:'views/document.html'}).
-        otherwise({redirectTo:'/databases'});
+        when(___g_NoSQLiteRoutePrefix___, {controller:'DatabaseCtrl', templateUrl:'views/database.html'}).
+        when(___g_NoSQLiteRoutePrefix___ + '/:database', {controller:'BucketCtrl', templateUrl:'views/bucket.html'}).
+        when(___g_NoSQLiteRoutePrefix___ + '/:database/:bucket', {controller:'DocumentCtrl', templateUrl:'views/document.html'}).
+        when(___g_NoSQLiteRoutePrefix___ + '/:database/:bucket/:documentId', {controller:'DocumentCtrl', templateUrl:'views/editDocument.html'}).
+        otherwise({redirectTo:___g_NoSQLiteRoutePrefix___});
 }])
-.run(function (breadcrumbsService) {
+.run(function ($rootScope, breadcrumbsService) {
     breadcrumbsService.set('breadcrumbsID', [{
-            href: '#/databases/',
-            label: 'Databases'
+            href: '#' + $rootScope.urlBasePath,
+            label: $rootScope.urlBaseLabel
         }
     ]);
+})
+.run(function($rootScope) {
+    $rootScope.clear = function (key) {
+        var from_css_right_inner_addon_input_padding_right_in_px = 20; //px
+            if (event.offsetX > event.target.clientWidth - from_css_right_inner_addon_input_padding_right_in_px) {
+            $rootScope[key] = '';
+        }
+    };
+    $rootScope.preventPropagation = function () {
+        event.stopPropagation();
+    };
+    $rootScope.preventDefault = function () {
+        event.preventDefault();
+    };
+    $rootScope.preventAll = function () {
+        event.preventDefault();
+        event.stopPropagation();
+    };
 })
 .directive('autoFillSync', function($timeout) {
     return {
@@ -84,6 +109,57 @@ angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers',
                     resetCrumbs();
                 });
             };
+        }
+    };
+})
+.directive('ngEnter', function() {
+    return function(scope, element, attrs) {
+        element.bind("keydown keypress", function(event) {
+            if(event.which === 13) {
+                scope.$apply(function(){
+                    scope.$eval(attrs.ngEnter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+})
+.directive('ngTab', function() {
+    return function(scope, element, attrs) {
+        element.bind("keydown keypress", function(event) {
+            if(event.which === 9) {
+                scope.$apply(function(){
+                    scope.$eval(attrs.ngTab);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+})
+.directive('ngEscape', function() {
+    return function(scope, element, attrs) {
+        element.bind("keydown keypress", function(event) {
+            if(event.which === 27) {
+                console.log('escape')
+                element.blur();
+            }
+        });
+    };
+})
+.directive('ngSetfocus', function($timeout, $parse) {
+    return {
+        //scope: true,   // optionally create a child scope
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.ngSetfocus);
+            scope.$watch(model, function(value) {
+                if(value === true) {
+                    element[0].focus();
+                }
+            });
+            element.bind('blur', function() {
+                element[0].value='';
+                scope.$apply(model.assign(scope, false));
+            });
         }
     };
 })

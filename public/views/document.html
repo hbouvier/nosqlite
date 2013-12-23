@@ -1,64 +1,124 @@
 <div class="container" ng-controller="DocumentCtrl">
-    <div class="row"> 
-        <div class="col-md-1"></div>
-        <br>
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">New Document</h3>
-            </div>
-            <div ng-show="fields.length" class="panel-body">
-                <form class="form-horizontal" role="form">
-                    <div ng-repeat="field in fields" class="form-group">
-                        <label class="col-sm-2 control-label">{{field.key}}</label>
-                        <div class="col-sm-10">
-                            <input ng-model="field.value" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
-                        <button ng-click="save()" type="submit" class="btn btn-default">Save</button>
-                        </div>
-                    </div>
-                </form>        
-            </div>
-            <div ng-hide="fields.length" class="panel-body">
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Id</label>
-                        <div class="col-sm-10">
-                            <input ng-model="documentKEY" type="text" class="form-control" placeholder="Id">
-                        </div>
-                        <label class="col-sm-2 control-label">Rev</label>
-                        <div class="col-sm-10">
-                            <input ng-model="documentRev" type="text" class="form-control" placeholder="Rev" disabled>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Document</label>
-                        <div class="col-sm-10">
-                            <textarea ng-model="documentJSON" class="form-control" rows="3" placeholder='{"key":"Document"}'></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-2">
-                            <select ng-model="documentType" class="form-control">
-                                <option>JSON</option>
-                                <option>String</option>
-                                <option>Integer</option>
-                                <option>Float</option>
-                                <option>Boolean</option>
-                            </select>                        
-                        </div>
-                    </div>                    
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
-                           <button ng-click="create()" type="submit" class="btn btn-primary">Save</button>
-                           <button ng-click="cancel()" type="submit" class="btn btn-default active">Cancel</button>
-                        </div>
-                    </div>
-                </form>        
-            </div>
-        </div>
-        <div class="col-md-1"></div>
+    <div class="row">
+        <!-- List of documents -->
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Revision</th>
+                    <th>Document</th>
+                    <td>Actions</td>
+                    <!--
+                    <th ng-repeat="(key, value) in documents[0].value">
+                        {{key}}
+                    </th>
+                    -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="row in document.rows | objectFilter:searchText" ng-click="select($index)">
+                    <td>{{row.key.id}}</td>
+                    <td>{{row.key.rev}}</td>
+                    <td>{{row.value}}</td>
+                    <td>
+                        <button type="submit" ng-click="editDocument(row)" class="btn btn-xs btn-default">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </button>
+                        <button type="submit" ng-click="alertOnDeleteDocument(row)" class="btn btn-xs btn-danger pull-right" data-toggle="modal" data-target="#deleteDocumentModal">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                    </td>
+                    <!--
+                    <td ng-repeat="(name, value) in document.value">
+                        {{value}}
+                    </td>
+                    -->
+                </tr>
+                <tr ng-hide="document.model.newRowAdded">
+                    <td colspan="9999">
+                        <button type="submit" ng-click="addRow()" class="btn btn-sm btn-default">Add</button>
+                    </td>
+                </tr>
+
+                <tr ng-show="document.model.newRowAdded">
+                    <td colspan="9999">
+                        <button type="submit" ng-click="create(document)" class="btn btn-sm btn-default">Create</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+
+
+
+    <!-- Delete Modal Dialog Box -->
+    <div class="modal fade" id="deleteDocumentModal" tabindex="-1" role="dialog" aria-labelledby="deleteDocumentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="deleteDocumentModalLabel">Delete Document</h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the document <b><i>"{{document.content.key.id}} / {{document.content.key.rev}}"</i></b> forever and ever?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button ng-click="deleteDocument()" type="button" class="btn btn-danger">Delete it</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- Edit Modal Dialog Box -->
+    <div class="modal fade" id="editDocumentModal" tabindex="-1" role="dialog" aria-labelledby="editDocumentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="editDocumentModalLabel">Edit {{document.content.key.id}}</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="panel-body">
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <div ng-repeat="field in document.fields.key">
+                                    <label class="col-sm-2 control-label">{{field.key}}</label>
+                                    <div class="col-sm-10">
+                                        <input ng-model="field.value" type="text" ng-readonly="field.readonly" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Document</label>
+                                <div class="col-sm-10">
+                                    <textarea ng-model="document.fields.value" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </form>
+
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">JSON</label>
+                                <div class="col-sm-1">
+                                    <input ng-disabled="!document.fields.isValidJson" ng-model="document.fields.json" ng-disabled="true" type="checkbox" class="form-control">
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button ng-click="saveDocument()" type="button" class="btn btn-danger">Save</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <input style="opacity:0;width:0px;height:0px" ng-setfocus="document.addRowOnEnter" ng-enter="addRow()">
 </div>

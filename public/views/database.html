@@ -1,0 +1,67 @@
+<div class="container" ng-controller="DatabaseCtrl">
+    <div class="row">
+        <div class="list-group">
+            <a ng-href="#{{urlBasePath}}" class="list-group-item active">
+                <!-- <input type="checkbox" ng-click="selectAll()" ng-model="database.allSelected"> &nbsp; -->
+                Databases
+                <span class="badge">Buckets</span>
+            </a>
+
+            <form class="form-inline" role="form">
+                <div ng-repeat="row in database.rows | objectFilter:searchText">
+                    <div>
+                        <a ng-href="#{{urlBasePath}}/{{row.name}}" class="list-group-item">
+                            <!-- <input type="checkbox" ng-click="preventPropagation()" ng-model="row.selected"> &nbsp; -->
+                            {{row.name}}
+                            <span class="badge">{{row.buckets.length}}</span>
+                            <button type="submit" ng-click="alertOnDeleteDatabase(row.name)" class="btn btn-xs btn-default rightspacer pull-right" data-toggle="modal" data-target="#deleteDatabaseModal">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </a>
+                     </div>
+                </div>
+                <div ng-show="database.model.newRowAdded">
+                    <input ng-model="database.name" type="text" class="form-control" id="newDatabaseName" placeholder="New Database Name"
+                           ng-enter="create(database.name, false)" ng-setfocus="database.model.newRowAddedFocus"
+                           ng-tab="create(database.name, true)" ng-escape>
+                </div>
+
+                <a ng-href="#{{urlBasePath}}" class="list-group-item">
+                    <div ng-hide="database.model.newRowAdded">
+                        <button type="submit" ng-click="addRow();" class="btn btn-sm btn-default">Add</button>
+                    </div>
+                    <div ng-show="database.model.newRowAdded">
+                        <button type="submit" ng-click="create(database.name)" class="btn btn-sm btn-default">Create</button>
+                    </div>
+
+                </a>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal Dialog Box -->
+    <div class="modal fade" id="deleteDatabaseModal" tabindex="-1" role="dialog" aria-labelledby="deleteDatabaseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="deleteDatabaseModalLabel">Delete Database</h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <b><i>"{{database.deleteDatabaseName}}"</i></b> forever and ever?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button ng-click="deleteDatabase()" type="button" class="btn btn-danger">Delete it</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- The focus will be on this "hidden" field by default, if the user press ENTER, we will add a new
+         database
+    -->
+    <input style="opacity:0;width:0px;height:0px" ng-setfocus="database.addRowOnEnter" ng-enter="addRow()">
+
+</div>

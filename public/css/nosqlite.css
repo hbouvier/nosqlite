@@ -2,6 +2,8 @@
     padding-top: 50px;
     padding-bottom: 20px;
 }
+
+/* Make object disabled like (grayed out)*/
 .grayedout {
     opacity : .50;
     cursor : default;
@@ -11,6 +13,64 @@
 .normal {
     cursor : default;
 }
+
+/* Make the breadcrum "NavBar" comptible */
 .breadcrumb-nav {
     margin : .5em;
 }
+
+/* Change the "/" in the breadcrumbs to use an Array instead */
+.breadcrumb > li + li:before {
+    padding: 0 5px;
+    color: #62a8db;
+    font-family: "Wingdings 3";
+    content: "4";  /* 4 is a thinner right arrow, _ is fatter */
+	font-weight: bold;
+}
+
+/* Add a carret at the bottom of a div */
+.down-arrow {
+	border-color: #f5f5f5 transparent;
+	border-style: solid;
+	border-width: 8px 8px 0px 8px;
+	height: 0px;
+	width: 0px;
+	position: relative;
+	color: black;
+	top: 1em;
+	left: 50%;
+}
+
+.left-inner-addon {
+    position: relative;
+}
+.left-inner-addon input {
+    padding-left: 30px;    
+}
+.left-inner-addon i {
+    position: absolute;
+    padding: 10px 12px;
+    pointer-events: none;
+}
+.right-inner-addon {
+    position: relative;
+}
+.right-inner-addon input {
+    padding-right: 20px;    
+}
+.right-inner-addon span {
+    position: absolute;
+    right: 0px;
+    padding: 10px 20px;
+    pointer-events: none;
+}
+
+.leftspacer {
+    margin-left: 40px; /* define margin as you see fit */
+}
+.rightspacer {
+    margin-right: 40px; /* define margin as you see fit */
+}
+
+
+
