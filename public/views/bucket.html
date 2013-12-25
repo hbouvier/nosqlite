@@ -11,7 +11,7 @@
                 <a ng-repeat="row in bucket.rows | objectFilter:searchText" ng-href="#{{urlBasePath}}/{{bucket.databaseSelected}}/{{row.name}}" class="list-group-item">
                     {{row.name}}
                     <span class="badge">{{row.count}}</span>
-                    <button type="submit" ng-click="alertOnDeleteBucket(row.name)" class="btn btn-xs btn-default rightspacer pull-right" data-toggle="modal" data-target="#deleteBucketModal">
+                    <button type="submit" ng-click="alertOnDeleteBucket(row.name)" class="btn btn-xs btn-danger rightspacer pull-right" data-toggle="modal" data-target="#deleteBucketModal">
                         <span class="glyphicon glyphicon-trash"></span>
                     </button>
                 </a>

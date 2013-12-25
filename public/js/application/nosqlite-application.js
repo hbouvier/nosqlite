@@ -60,17 +60,38 @@ angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers',
         }
     };
 })
-.directive('ngIf', function() {
+.directive('ngPrettify', function($parse) {
     return {
         link: function(scope, element, attrs) {
-            if(scope.$eval(attrs.ngIf)) {
-                // remove '<div ng-if...></div>'
-                //element.replaceWith(element.children())
-            } else {
-              element.replaceWith(' ')
+            function JSONprettify(json) {
+                if (typeof json != 'string') {
+                    json = JSON.stringify(json, undefined, 2);
+                }
+                json = json.replace(/{/g, "{    ").
+                    replace(/,/g, ",    ");
+
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    var cls = 'number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'key';
+                        } else {
+                            cls = 'string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
             }
+            var model = $parse(attrs.ngPrettify)(scope);
+            var html = (typeof(model) === 'object') ? '<pre>'+JSONprettify(model)+'</pre>' : model;
+            element.replaceWith(html);
         }
-    }
+    };
 })
 .directive('ngBreadcrumbs', function($log, breadcrumbsService) {
     return {
@@ -140,7 +161,6 @@ angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers',
     return function(scope, element, attrs) {
         element.bind("keydown keypress", function(event) {
             if(event.which === 27) {
-                console.log('escape')
                 element.blur();
             }
         });

@@ -4,21 +4,148 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             databaseSelected : $routeParams.database,
             bucketSelected   : $routeParams.bucket,
             documentSelected : $routeParams.documentId,
-            addRowOnEnter : true,
+            addRowOnEnter    : true,
             rows             : [], // List of documents in this bucket
-            content          : {}, // The document we are viewing/editing
-            fields           : [], // The fields (keys) of the document we are viewing/editing
+            content          : null, // The document we are viewing/editing
+            json             : false,
             model            : DocumentModel
         };
 
+
+        ///////////////////////////////////////////////////////////////////////
+
+        find($scope.document.documentSelected);
+        updateBreadcrumbs();
+
+
+        ///////////////////////////////////////////////////////////////////////
+        function setPageContent(document) {
+            $scope.document.content = document;
+            if (typeof(document.value) === 'object' && document.value instanceof Array === false) {
+                $scope.document.json = true;
+                $scope.document.content.value = JSONprettify(JSON.stringify(document.value));
+            } else {
+                $scope.document.json = false;
+                $scope.document.content.value = document.value;
+            }
+        }
+
+        function closeAll() {
+            for (var i = 0 ; i < $scope.document.rows.length ; ++i) {
+                $scope.document.rows[i].edit = false;
+            }
+        }
+        /**
+         * When clicking anywhere on a Document "Row"
+         *
+         * @param index
+         */
         $scope.select = function (index) {
-            $location.path($scope.urlBasePath + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + JSON.stringify($scope.document.rows[index].key));
+            closeAll();
+            $scope.document.rows[index].edit = true;
+            $scope.document.model.content = null;
+            setPageContent($scope.document.rows[index]);
+
+            /*
+            $scope.preventAll();
+            setPageContent($scope.document.rows[index]);
+            $('#editDocumentModal').modal({
+                backdrop:true,
+                keyboard:true,
+                show:true,
+                remote:false
+            });
+            */
         };
+        $scope.close = function (index) {
+            $scope.preventPropagation();
+            $scope.document.rows[index].edit = false;
+        }
+
+        /**
+         * Clicking on the EDIT Icon of a document row
+         *
+         * @param document
+         */
+        $scope.editDocument = function (document) {
+            $location.path(
+                $scope.urlBasePath + '/' +
+                    $scope.document.databaseSelected + '/' +
+                    $scope.document.bucketSelected + '/' +
+                    JSON.stringify(document.key)
+            );
+        };
+
+        /**
+         * When Clicking on a row TRASHCAN, show the dialog box
+         * @param name
+         */
+        $scope.alertOnDeleteDocument = function (document) {
+            $scope.preventAll();
+            $scope.document.content = document;
+            $('#deleteDocumentModal').modal({
+                backdrop:true,
+                keyboard:true,
+                show:true,
+                remote:false
+            });
+        };
+
+        /**
+         * The ADD Button
+         */
+        $scope.addRow = function () {
+            $scope.document.model.content={key:'',value:''};
+            closeAll();
+            setTimeout(function() {
+                $('#key').focus();
+
+            }, 100);
+            /*
+             $scope.document.content = {"key" : {"id" : ""}, "value":""};
+             $('#editDocumentModal').modal({
+             backdrop:true,
+             keyboard:true,
+             show:true,
+             remote:false
+             });
+             */
+        };
+        $scope.resetRow = function () {
+            $scope.document.model.content = null;
+            $scope.document.addRowOnEnter = true;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /**
+         *  Click on the SAVE button
+         */
+        $scope.saveDocument = function (document) {
+            $scope.document.content = document;
+            save();
+        };
+
+        /**
+         * The CANCEL button on the dialog box
+         *
+         */
         $scope.cancel = function () {
             $location.path($scope.urlBasePath + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected);
         }
 
-        $scope.find = function (key) {
+        /**
+         * The "DELETE IT" button on the dialog box
+         *
+         */
+        $scope.deleteDocument = function () {
+            deleteDocument($scope.document.content);
+            $('#deleteDocumentModal').modal('hide');
+        };
+
+        ///////////////////////////////////////////////////////////////////////
+
+        function find(key) {
             var url = encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' +
                 (key ? key + '?exact=true' : '*?exact=false'));
             $http( {
@@ -31,14 +158,32 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                     else {
                         $scope.document.rows = [data];
                         $scope.document.documentSelected = data.key;
-                        $scope.document.content = data;
-                        $scope.document.fields = introspectDocument($scope.document.content);
+                        setPageContent(data);
                     }
                 }).
                 error(function(data, status, headers, config) {
                 });
         };
-        $scope.find($scope.document.documentSelected);
+        var a ={
+            "name":"bob",
+            "a":"b",
+            "vec":[
+                null,
+                1,
+                2,
+                3,
+                4,
+                true,
+                5,
+                {
+                    "obj":{
+                        "a":"b",
+                        "b":"c"
+                    }
+                },
+                "str"
+            ]
+        };
 
         function updateBreadcrumbs() {
             var vector = [
@@ -64,45 +209,6 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             breadcrumbsService.set('breadcrumbsID', vector);
         }
 
-        updateBreadcrumbs();
-
-
-        $scope.addRow = function () {
-            $scope.document.content = {"key" : {"id" : ""}, "value":""};
-            $scope.document.fields = introspectDocument($scope.document.content);
-            $('#editDocumentModal').modal({
-                backdrop:true,
-                keyboard:true,
-                show:true,
-                remote:false
-            });
-        };
-
-        /**
-         * Show the Modal Dialog Box, when the user ask to delete a bucket
-         * @param name
-         */
-        $scope.alertOnDeleteDocument = function (document) {
-            $scope.preventAll();
-            $scope.document.content = document;
-            $('#deleteDocumentModal').modal({
-                backdrop:true,
-                keyboard:true,
-                show:true,
-                remote:false
-            });
-        };
-
-        /**
-         * When the user confirm the bucket deletion, we invoke the delete REST API
-         * and hide the Dialog Box.
-         */
-        $scope.deleteDocument = function () {
-            deleteDocument($scope.document.content);
-            $('#deleteDocumentModal').modal('hide');
-        };
-
-
         /**
          * REST call to delete a bucket
          * @param bucket
@@ -124,19 +230,13 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                 });
         }
 
-        $scope.editDocument = function (document) {
-            $scope.preventAll();
-            $scope.document.content = document;
-            $scope.document.fields = introspectDocument($scope.document.content);
-            $('#editDocumentModal').modal({
-                backdrop:true,
-                keyboard:true,
-                show:true,
-                remote:false
-            });
-        };
-
-        function isValidJSON(value) {
+        /**
+         * Helper function to detect JSON vs Native type (e.g. Array, Number, Boolean and String)
+         *
+         * @param value
+         * @returns {boolean}
+         */
+        $scope.isValidJSON = function (value) {
             var valide = true;
             try {
                 var obj = JSON.parse(value);
@@ -148,107 +248,16 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             return valide;
         }
 
-        function introspectDocument(document) {
-            var fields   = {key:[], objectDescription:[], value:null, json:false, isValidJson:false};
-            var readonly = (document.key && document.key.rev);
-
-            // Copy the Key and REVision
-            if (typeof(document.key) === 'object') {
-                for (var name in document.key) {
-                    if (document.key.hasOwnProperty(name)) {
-                        fields.key.push({readonly:readonly, key:name, value:document.key[name]});
-                    }
-                }
-            } else {
-                fields.key.push({readonly:false, key:"Id", value:document.key});
-            }
-
-            // Document Value
-            if (typeof(document.value) === 'string') {
-                fields.isValidJson = isValidJSON(document.value);
-                fields.json = false;
-                fields.value = document.value;
-            } else if (document.value instanceof Array) {
-                fields.isValidJson = isValidJSON(document.value);
-                fields.json = false;
-                fields.value = JSON.stringify(document.value);
-            } else if (typeof(document.value) === 'object') {
-                fields.json = fields.isValidJson = true;
-                fields.value = JSON.stringify(document.value);
-                for (name in document.value) {
-                    if (document.value.hasOwnProperty(name)) {
-                        fields.objectDescription.push({key:name, value:document.value[name]});
-                    }
-                }
-            } else  {
-                fields.isValidJson = isValidJSON(document.value);
-                fields.json = false;
-                fields.value = document.value;
-            }
-            return fields;
-        }
-
-        /**
-         * Watch for a key Modification
-         */
-        $scope.$watch('document.fields.key', function (value, oldvalue) {
-            if (value && value.length === 1) {
-                // Create a NEW document only with an ID (without a REVision)
-                $scope.document.content.key = value[0].value;
-            } else {
-                // An existing document with ID and REVision
-                // NOTE:  This should not happen, when the document exists the ID/REV will be readonly!
-                $scope.document.content.key = {};
-                for (var i = 0 ; value && i < value.length ; ++i) {
-                    $scope.document.content.key[value[i].key] = value[i].value;
-                }
-            }
-            console.log('Watch|key|key=', $scope.document.content.key, '|watch-value=', value);
-        }, true);
-
-        /**
-         * Watch for individual property change, inside the JSON document
-         */
-        $scope.$watch('document.fields.objectDescription', function (value, oldvalue) {
-            for (var i = 0 ; value && i < value.length ; ++i) {
-                $scope.document.content.value[value[i].key] = value[i].value;
-            }
-            $scope.document.fields.value = JSON.stringify($scope.document.content.value);
-            console.log('Watch|objectDescription|value=', $scope.document.content.value, '|stringvalue=', $scope.document.fields.value, '|watch-value=', value);
-        }, true);
-
-        /**
-         * Watch for the raw content Modifications
-         */
-        $scope.$watch('document.fields.value', function (value, oldvalue) {
-            try {
-                $scope.document.content.value = JSON.parse(value);
-            } catch (e) {
-                $scope.document.content.value = value;
-            }
-            $scope.document.fields = introspectDocument($scope.document.content);
-            console.log('Watch|value|value=', $scope.document.content.value, '|fields=', $scope.document.fields, '|watch-value=', value);
-        });
-
-        /**
-         * When the user confirm the bucket deletion, we invoke the delete REST API
-         * and hide the Dialog Box.
-         */
-        $scope.saveDocument = function () {
-            $scope.save($scope.document.content);
-        };
-
-
         /**
          * REST call to save a document
          */
-        $scope.save = function () {
+        function save() {
             var key = typeof($scope.document.content.key) === 'object' ? JSON.stringify($scope.document.content.key) : $scope.document.content.key;
             $http( {
                 method: 'PUT',
                 url:  encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + key),
                 headers: {
-                    'Content-Type': ($scope.document.fields.json ? 'application/json' : 'text/plain') + '; charset="UTF-8"'
+                    'Content-Type': ($scope.document.json ? 'application/json' : 'text/plain') + '; charset="UTF-8"'
                 },
                 data : $scope.document.content.value
             }).
@@ -265,9 +274,13 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                         $scope.document.rows.push(data);
                     }
                     $scope.document.content = data;
-                    $scope.document.fields  = introspectDocument($scope.document.content);
                     if ($scope.document.documentSelected) {
-                        $location.path($scope.urlBasePath + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + JSON.stringify(data.key));
+                        $location.path(
+                              $scope.urlBasePath
+                            + '/' + $scope.document.databaseSelected
+                            + '/' + $scope.document.bucketSelected
+                            // + '/' + JSON.stringify(data.key)
+                        );
                     } else {
                         $('#editDocumentModal').modal('hide');
                     }
@@ -276,5 +289,35 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                     alert('ERROR');
                 });
         };
+        function JSONprettify(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+
+            json = json.replace(/{/g, "{\n").replace(/\[/g, "[\n").replace(/,/g, ",\n");
+            json = json.replace(/}/g, "\n}").replace(/\]/g, "\n]");
+
+            var prefix = '        ';
+            var prefixLen = prefix.length;
+            var ident = '';
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:.*)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|[\{\}\[\]]?)/g, function (match) {
+                var key = false;
+                var thisIdent = ident;
+
+                if (/^"[^"]*"\s*:.*/.test(match)) {
+                    key = true;
+                }
+                if (/\{|\[/.test(match)) {
+                    ident += prefix;
+                }
+                if (/\}|\]/.test(match)) {
+                    thisIdent = ident = ident.substring(prefixLen);
+                }
+                if (match === '') {
+                    thisIdent = '';
+                }
+                return thisIdent + match;
+            });
+        }
     })
 ;

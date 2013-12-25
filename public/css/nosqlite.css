@@ -72,5 +72,15 @@
     margin-right: 40px; /* define margin as you see fit */
 }
 
+/* JSON */
 
+/* pre       { outline: 1px solid #ccc; padding: 5px; margin: 5px; background: transparent;} */
+pre       { display: inline-block; border:0px solid transparent; padding: 0px; margin: 0px; background: transparent; color:white}
+.string   { color: yellowgreen; }
+.number   { color: dodgerblue; }
+.boolean  { color: darkorange; }
+.null     { color: darkorange; }
+.key      { color: mediumpurple; }
+.gone     { display: none; }
+.cameleon { position: absolute; top:0; right:0; color:transparent; }
 

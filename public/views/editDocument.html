@@ -6,126 +6,44 @@
             </div>
 
             <div class="panel-body">
-                <div ng-show="document.fields.json">
-                    <!-- Nav tabs -->
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#document" data-toggle="tab">Document</a></li>
-                        <li><a href="#raw" data-toggle="tab">Raw JSON</a></li>
-                    </ul>
-                    <!-- Tab panes -->
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="document">
-                            <form class="form-horizontal" role="form">
-                                <div class="form-group">
-                                    <div ng-repeat="field in document.fields.key">
-                                        <label class="col-sm-2 control-label">{{field.key}}</label>
-                                        <div class="col-sm-10">
-                                            <input ng-model="field.value" type="text" ng-readonly="field.readonly" class="form-control" ng-enter="saveDocument()">
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-
-
-
-                            <form class="form-horizontal" role="form">
-                                <div ng-show="document.fields.json" class="form-group">
-                                    <div ng-repeat="field in document.fields.objectDescription">
-                                        <label class="col-sm-2 control-label">{{field.key}}</label>
-                                        <div class="col-sm-10">
-                                            <input ng-model="field.value" type="text" ng-readonly="field.readonly" class="form-control" ng-enter="saveDocument()">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div ng-hide="document.fields.json" class="form-group">
-                                    <label class="col-sm-2 control-label">Document</label>
-                                    <div class="col-sm-10">
-                                        <textarea style="resize:vertical;" ng-model="document.fields.value" class="form-control" rows="auto" cols="auto" ng-enter="saveDocument()"></textarea>
-                                    </div>
-                                </div>
-                            </form>
-
-                            <form class="form-horizontal" role="form">
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">JSON</label>
-                                    <div class="col-sm-1">
-                                        <input ng-disabled="!document.fields.isValidJson" ng-model="document.fields.json" type="checkbox" ng-disabled="document.fields.json" class="form-control" ng-enter="saveDocument()">
-                                    </div>
-                                </div>
-                            </form>
-
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Id</label>
+                        <div class="col-sm-10">
+                            <input ng-model="document.content.key.id" type="text" readonly="true" class="form-control">
                         </div>
-                        <div class="tab-pane" id="raw">
-
-
-                            <form class="form-horizontal" role="form">
-                                <div class="form-group">
-                                    <div ng-repeat="field in document.fields.key">
-                                        <label class="col-sm-2 control-label">{{field.key}}</label>
-                                        <div class="col-sm-10">
-                                            <input ng-model="field.value" type="text" ng-readonly="field.readonly" class="form-control" ng-enter="saveDocument()">
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-
-                            <form class="form-horizontal" role="form">
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">Document</label>
-                                    <div class="col-sm-10">
-                                        <textarea style="resize:vertical;" ng-model="document.fields.value" class="form-control" rows="auto" cols="auto" ng-enter="saveDocument()"></textarea>
-                                    </div>
-                                </div>
-                            </form>
-
-                            <form class="form-horizontal" role="form">
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">JSON</label>
-                                    <div class="col-sm-1">
-                                        <input ng-disabled="!document.fields.isValidJson" ng-model="document.fields.json" type="checkbox" class="form-control" ng-enter="saveDocument()">
-                                    </div>
-                                </div>
-                            </form>
+                        <label class="col-sm-2 control-label">Revision</label>
+                        <div class="col-sm-10">
+                            <input ng-model="document.content.key.rev" type="text" readonly="true" class="form-control">
                         </div>
                     </div>
-                </div>
-                <div ng-hide="document.fields.json">
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <div ng-repeat="field in document.fields.key">
-                                <label class="col-sm-2 control-label">{{field.key}}</label>
-                                <div class="col-sm-10">
-                                    <input ng-model="field.value" type="text" ng-readonly="field.readonly" class="form-control" ng-enter="saveDocument()">
-                                </div>
-                            </div>
+                </form>
+
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Document</label>
+                        <div class="col-sm-10">
+                            <textarea style="resize:vertical;" ng-model="document.content.value" class="form-control" rows="auto" cols="auto" ng-enter="saveDocument(document.content)"></textarea>
                         </div>
-                    </form>
+                    </div>
+                </form>
 
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Document</label>
-                            <div class="col-sm-10">
-                                <textarea style="resize:vertical;" ng-model="document.fields.value" class="form-control" rows="auto" cols="auto" ng-enter="saveDocument()"></textarea>
-                            </div>
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">JSON</label>
+                        <div class="col-sm-1">
+                            <input ng-disabled="!isValidJSON(document.content.value)" ng-model="document.json" type="checkbox" class="form-control" ng-enter="saveDocument(document.content)">
                         </div>
-                    </form>
-
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">JSON</label>
-                            <div class="col-sm-1">
-                                <input ng-disabled="!document.fields.isValidJson" ng-model="document.fields.json" type="checkbox" class="form-control" ng-enter="saveDocument()">
-                            </div>
-                        </div>
-                    </form>
-
-                </div>
+                    </div>
+                </form>
 
 
-                <button ng-click="saveDocument()" type="submit" class="btn btn-success">Save</button>
+                <button ng-click="saveDocument(document.content)" type="submit" class="btn btn-success">Save</button>
                 <button ng-click="cancel()" type="submit" class="btn btn-default">Cancel</button>
             </div>
         </div>
     </div>
-    <input style="opacity:0;width:0px;height:0px" ng-setfocus="document.addRowOnEnter" ng-enter="saveDocument()">
+    <!--
+    <input style="opacity:0;width:0px;height:0px" ng-setfocus="document.addRowOnEnter" ng-enter="saveDocument(document.content)">
+    -->
 </div>
