@@ -41,21 +41,11 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
          * @param index
          */
         $scope.select = function (index) {
+            if ($scope.document.rows[index].edit) return;
             closeAll();
             $scope.document.rows[index].edit = true;
             $scope.document.model.content = null;
             setPageContent($scope.document.rows[index]);
-
-            /*
-            $scope.preventAll();
-            setPageContent($scope.document.rows[index]);
-            $('#editDocumentModal').modal({
-                backdrop:true,
-                keyboard:true,
-                show:true,
-                remote:false
-            });
-            */
         };
         $scope.close = function (index) {
             $scope.preventPropagation();
@@ -163,26 +153,6 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                 }).
                 error(function(data, status, headers, config) {
                 });
-        };
-        var a ={
-            "name":"bob",
-            "a":"b",
-            "vec":[
-                null,
-                1,
-                2,
-                3,
-                4,
-                true,
-                5,
-                {
-                    "obj":{
-                        "a":"b",
-                        "b":"c"
-                    }
-                },
-                "str"
-            ]
         };
 
         function updateBreadcrumbs() {

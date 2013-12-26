@@ -24,7 +24,9 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
         };
         $scope.$watch('bucket.model.newRowAddedFocus', function(value) {
             if(value === false) {
-                $scope.bucket.model.newRowAdded = false;
+                setTimeout(function () {
+                    $scope.bucket.model.newRowAdded = false;
+                }, 100);
             }
         });
 

@@ -2,7 +2,7 @@
     "author"      : "Henri Bouvier",
     "name"        : "nosqlited",
     "description" : "A nosql light database",
-    "version"     : "0.0.5",
+    "version"     : "0.0.6",
     "repository"  : {
         "type" : "git",
         "url"  : "https://github.com/hbouvier/nosqlite.git"
@@ -49,9 +49,8 @@
     "configuration"        : {
         "name"    : "nosqlited",
         "level"   : "debug",
-        "context" : "/nosqlite",
-        "api"     : "/api/v1",
-        "ui"      : "/ui",
+        "api"     : "/nosqlite/api/v1",
+        "ui"      : "/",
         "port"    : 4200
     }
 }

@@ -35,7 +35,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">JSON</label>
                                     <div class="col-sm-2">
-                                        <input ng-disabled="!isValidJSON(row.value)" ng-model="document.json"
+                                        <input ng-disabled="!isValidJSON(document.content.value)" ng-model="document.json"
                                                type="checkbox" class="form-control" ng-enter="saveDocument(document.content)">
                                     </div>
                                 </div>

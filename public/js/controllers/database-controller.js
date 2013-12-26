@@ -9,7 +9,6 @@ angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
             model : DatabaseModel
         };
 
-        console.log('database controler')
         $scope.selectAll = function () {
             console.log('selectAll:',$scope.database.allSelected)
             for (var index in $scope.database.rows) {
@@ -96,7 +95,9 @@ angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
 
         $scope.$watch('database.model.newRowAddedFocus', function(value) {
             if(value === false) {
-                $scope.database.model.newRowAdded = false;
+                setTimeout(function () {
+                    $scope.database.model.newRowAdded = false;
+                }, 100);
             }
         });
 
