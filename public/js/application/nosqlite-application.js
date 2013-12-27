@@ -1,8 +1,8 @@
 var ___g_NoSQLiteRoutePrefix___ = '/home';
 angular.module('nosqliteApplication', ['nosqliteServices','nosqliteControllers', 'nosqliteBucketControllers', 'nosqliteDocumentControllers'])
 .run(function($rootScope) {
-    $rootScope.baseAPIurl  = '/nosqlite/api/v1';
-    $rootScope.baseUIurl   = '/nosqlite/ui';
+    $rootScope.baseAPIurl  = '/api/v1';
+    $rootScope.baseUIurl   = '/';
     $rootScope.urlBasePath = ___g_NoSQLiteRoutePrefix___;
     $rootScope.urlBaseLabel = 'Home';
 })

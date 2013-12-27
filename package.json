@@ -47,10 +47,12 @@
         "clean" : "rm -rf coverage lib-cov"
     },
     "configuration"        : {
-        "name"    : "nosqlited",
-        "level"   : "debug",
-        "api"     : "/nosqlite/api/v1",
-        "ui"      : "/",
-        "port"    : 4200
+        "name"       : "nosqlited",
+        "level"      : "debug",
+        "data"       : "data",
+        "config"     : "config.json",
+        "api"        : "/nosqlite/api/v1",
+        "ui"         : "/",
+        "port"       : 4200
     }
 }

@@ -96,10 +96,24 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expect listing buckets for an unopenned database to be rejected', function () {
+            QHelper(database.list(), 'Waiting for the buckets to be listed', function (state) {
+                expect(state).toBe('rejected');
+            });
+        });
+
         // Starting normal call flow
         it('Expect openning the Database to succeed', function () {
             QHelper(database.open(), "Waiting for the database to be openned", function (state) {
                expect(state).toBe('fulfilled');
+            });
+
+        });
+
+        it('Expect listing buckets for an empty database to succeed', function () {
+            QHelper(database.list(), 'Waiting for the buckets to be listed', function (state, buckets) {
+                expect(state).toBe('fulfilled');
+                expect(buckets.length).toBe(0);
             });
         });
 
@@ -109,6 +123,13 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
                expect(bucket).not.toBeNull();
                expect(bucket.db).not.toBeNull();
                expect(bucket.getName()).toBe(bucketName);
+            });
+        });
+
+        it('Expect listing buckets for a database to succeed', function () {
+            QHelper(database.list(), 'Waiting for the buckets to be listed', function (state, buckets) {
+                expect(state).toBe('fulfilled');
+                expect(buckets.length).toBe(1);
             });
         });
 
@@ -146,6 +167,14 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
 
+        it('Expect listing buckets for an empty database to succeed', function () {
+            QHelper(database.list(), 'Waiting for the buckets to be listed', function (state, buckets) {
+                expect(state).toBe('fulfilled');
+                expect(buckets.length).toBe(0);
+            });
+        });
+
+
         // Invalid call
         it('Expect retreiving the document from the destroyed bucket to be rejected', function () {
             QHelper(database.bucket(bucketName).get(document.key), 'Waiting for key/value pair retreival to fail', function (state, result) {
@@ -160,6 +189,13 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
                expect(state).toBe('fulfilled');
             });
         });
+
+        it('Expect listing buckets for a closed database to be rejected', function () {
+            QHelper(database.list(), 'Waiting for the buckets to be listed', function (state) {
+                expect(state).toBe('rejected');
+            });
+        });
+
         it('Expect Deleting the closed Database to succeed', function () {
             QHelper(database.delete(), "Waiting for the database to be deleted", function (state) {
                expect(state).toBe('fulfilled');
