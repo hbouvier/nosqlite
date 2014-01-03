@@ -30,9 +30,20 @@
 
                 <form class="form-horizontal" role="form">
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">JSON</label>
+                        <label class="col-sm-2 control-label">Content-Type</label>
                         <div class="col-sm-1">
+                            <div class="dropdown">
+                                <button id="dropdownMenu" class="btn dropdown-toggle" type="button" data-toggle="dropdown">
+                                    {{contentTypeToName(document.content.contentType)}}
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                                    <li ng-repeat="type in document.contentTypes" role="presentation" ng-click="chooseContentType(document.content, type.contentType)">{{type.name}}</li>
+                                </ul>
+                            </div>
+<!--
                             <input ng-disabled="!isValidJSON(document.content.value)" ng-model="document.json" type="checkbox" class="form-control" ng-enter="saveDocument(document.content)">
+-->
                         </div>
                     </div>
                 </form>

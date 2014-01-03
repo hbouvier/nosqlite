@@ -75,7 +75,6 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
 
     /////////////////////// BUCKET LIFE CYCLE ////////////////////////////
 
-
     describe('Testing a Bucket Life cycle within a ' + testDatabaseImplementation[index].name + ' Database', function () {
 
         var database   = new NoSqlite(testDatabaseImplementation[index].filename, {level:level, journal:false});
@@ -202,6 +201,7 @@ for (var index = 0 ; index < testDatabaseImplementation.length ; ++index) {
             });
         });
     });
+
 
     /////////////////////// DOCUMENT LIFE CYCLE ////////////////////////////
 

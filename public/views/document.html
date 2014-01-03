@@ -18,25 +18,37 @@
             <tbody>
             <tr ng-repeat="row in document.rows | objectFilter:searchText" ng-click="select($index)">
                 <td style="white-space:nowrap;">{{row.key.id}}</td>
-                <td style="white-space:nowrap;">{{row.key.rev.substring(0,8)}}</td>
+                <td style="white-space:nowrap;">
+                    <div ng-hide="row.edit">
+                        {{row.key.rev.substring(0,8)}}
+                    </div>
+                    <div ng-show="row.edit">
+                        <div class="form-group">
+                            <div class="dropdown">
+                                <button id="dropdownMenu1" class="btn dropdown-toggle" type="button" data-toggle="dropdown">
+                                    {{contentTypeToName(document.content.contentType)}}
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li ng-repeat="type in document.contentTypes" role="presentation" ng-click="chooseContentType(document.content, type.contentType)">{{type.name}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </td>
                 <td style="word-wrap: break-word;">
                     <div ng-hide="row.edit">
-                        <div ng-prettify="row.value">{{row.value}}</div>
+                        <div style="height:125px;overflow: scroll">
+                            <div ng-Prettify-Json="row.value">{{row.value}}</div>
+                        </div>
                     </div>
                     <div ng-show="row.edit" class="panel panel-primary">
                         <div class="panel-body">
                             <form class="form-vertical" role="form">
                                 <div class="form-group">
-                                    <div class="col-sm-10">
-                                        <textarea style="resize:vertical;" cols="99999" rows="10" ng-model="document.content.value" class="form-control"
+                                    <div class="col-sm-12">
+                                        <textarea style="resize:vertical;" cols="99999" rows="30" ng-model="document.content.value" class="form-control"
                                               rows="auto" cols="auto"></textarea>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">JSON</label>
-                                    <div class="col-sm-2">
-                                        <input ng-disabled="!isValidJSON(document.content.value)" ng-model="document.json"
-                                               type="checkbox" class="form-control" ng-enter="saveDocument(document.content)">
                                     </div>
                                 </div>
                             </form>
@@ -85,11 +97,21 @@
                     <input ng-show="document.model.content.key.rev" ng-model="document.model.content.key.rev"
                            type="text" readonly="true" class="form-control" placeholder="Revision"
                            ng-enter="saveDocument(document.model.content);resetRow();">
+                    <div class="dropdown">
+                        <button id="dropdownMenu" class="btn dropdown-toggle" type="button" data-toggle="dropdown">
+                            {{contentTypeToName(document.model.content.contentType)}}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                            <li ng-repeat="type in document.contentTypes" role="presentation" ng-click="chooseContentType(document.model.content, type.contentType)">{{type.name}}</li>
+                        </ul>
+                    </div>
                 </td>
                 <td>
                     <textarea style="resize:vertical;" ng-model="document.model.content.value" class="form-control"
                               rows="auto" cols="auto" placeholder="Document"
                               ng-enter="saveDocument(document.model.content);resetRow();"></textarea>
+
                 </td>
                 <td>
                     <button type="submit" ng-click="saveDocument(document.model.content);resetRow();"
@@ -103,9 +125,16 @@
             </tr>
 
             <tr class="active" ng-hide="document.model.content">
-                <td colspan="9999">
-                    <button type="submit" ng-click="addRow()" class="btn btn-sm btn-default">Add</button>
+                <td colspan="2">
+                    <button type="submit" ng-click="addRow();document.json=undefined;" class="btn btn-sm btn-default">Add</button>
                 </td>
+                <td colspan="2">
+                    <ul class="pagination">
+                        <li class="active"><a ng-click="previous()" href="#">&laquo;</a></li>
+                        <li class="active"><a ng-click="next()" href="#">&raquo;</a></li>
+                    </ul>
+                </td>
+
             </tr>
 
             </tbody>

@@ -14,6 +14,8 @@ angular.module('nosqliteModels', [])
     .factory('DocumentModel', function() {
         var model = {
             newRowAdded : false,
+            limit  : 5,
+            offset : 0,
             field : {key:{id:""}, value:""}
         };
         return model;

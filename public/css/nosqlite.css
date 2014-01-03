@@ -72,6 +72,8 @@
     margin-right: 40px; /* define margin as you see fit */
 }
 
+.show-document {display: inline-block; border:0px solid transparent; padding: 0px; margin: 0px; background: transparent; color:white; width:100%; height:100%}
+
 /* JSON */
 
 /* pre       { outline: 1px solid #ccc; padding: 5px; margin: 5px; background: transparent;} */

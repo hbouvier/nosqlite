@@ -8,7 +8,14 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             rows             : [], // List of documents in this bucket
             content          : null, // The document we are viewing/editing
             json             : false,
-            model            : DocumentModel
+            model            : DocumentModel,
+            contentTypes     : [
+                {name:"json",       contentType:'application/json; charset="UTF-8"'},
+                {name:"javascript", contentType:'application/javascript; charset="UTF-8"'},
+                {name:"css",        contentType:'text/css; charset="UTF-8"'},
+                {name:"html",       contentType:'text/html; charset="UTF-8"'},
+                {name:"text",       contentType:'text/plain; charset="UTF-8"'}
+            ]
         };
 
 
@@ -35,6 +42,15 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                 $scope.document.rows[i].edit = false;
             }
         }
+
+        $scope.contentTypeToName = function (contentType) {
+            for (var i = 0 ; i < $scope.document.contentTypes.length ; ++i) {
+                if ($scope.document.contentTypes[i].contentType === contentType)
+                    return $scope.document.contentTypes[i].name;
+            }
+            return $scope.contentTypeToName('text/plain; charset="UTF-8"');
+        };
+
         /**
          * When clicking anywhere on a Document "Row"
          *
@@ -51,6 +67,12 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             $scope.preventPropagation();
             $scope.document.rows[index].edit = false;
         }
+
+
+
+        $scope.chooseContentType = function (document, contentType) {
+            document.contentType = contentType;
+        };
 
         /**
          * Clicking on the EDIT Icon of a document row
@@ -89,7 +111,6 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
             closeAll();
             setTimeout(function() {
                 $('#key').focus();
-
             }, 100);
             /*
              $scope.document.content = {"key" : {"id" : ""}, "value":""};
@@ -135,9 +156,21 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
 
         ///////////////////////////////////////////////////////////////////////
 
+        $scope.next = function () {
+            $scope.document.model.offset += $scope.document.model.limit;
+            find();
+            $scope.preventAll();
+        };
+        $scope.previous = function () {
+            $scope.document.model.offset -= $scope.document.model.limit;
+            $scope.document.model.offset = $scope.document.model.offset < 0 ? 0 : $scope.document.model.offset;
+            find();
+            $scope.preventAll();
+        };
+
         function find(key) {
             var url = encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' +
-                (key ? key + '?exact=true' : '*?exact=false'));
+                (key ? key + '?exact=true' : ('*?exact=false&offset=' + $scope.document.model.offset + '&limit=' +  $scope.document.model.limit)));
             $http( {
                 method: 'GET',
                 url: url
@@ -152,6 +185,8 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                     }
                 }).
                 error(function(data, status, headers, config) {
+                    $scope.document.rows = [];
+                    $scope.document.documentSelected = undefined;
                 });
         };
 
@@ -223,11 +258,17 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
          */
         function save() {
             var key = typeof($scope.document.content.key) === 'object' ? JSON.stringify($scope.document.content.key) : $scope.document.content.key;
+            $scope.document.json = $scope.document.json === true ? true : $scope.document.json === false ? false : $scope.isValidJSON($scope.document.content.value);
             $http( {
                 method: 'PUT',
                 url:  encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + key),
                 headers: {
-                    'Content-Type': ($scope.document.json ? 'application/json' : 'text/plain') + '; charset="UTF-8"'
+                    'Content-Type':   ($scope.document.json ? 'application/json' : 'text/plain') + '; charset="UTF-8"',
+                    'X-Content-Type' : $scope.document.content.contentType
+                },
+                transformRequest : function (data, headers) {
+                    console.log('docuent:transformRequest:data=', data);
+                    return data;
                 },
                 data : $scope.document.content.value
             }).
