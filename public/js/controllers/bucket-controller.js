@@ -1,5 +1,5 @@
 angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels'])
-    .controller('BucketCtrl', function($scope, $routeParams, $http, $location, breadcrumbsService, BucketModel) {
+    .controller('BucketCtrl', function($scope, $routeParams, Bucket, $location, breadcrumbsService, BucketModel) {
         $scope.bucket = {
             name : '',
             addRowOnEnter : true,
@@ -60,6 +60,19 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
          * @param bucket
          */
         function deleteBucket(bucket) {
+            Bucket.delete({database:$scope.bucket.databaseSelected, bucket:bucket}).$promise.then(function (data) {
+                for (var index = 0 ; index < $scope.bucket.rows.length ; ++index) {
+                    if ($scope.bucket.rows[index].name === bucket) {
+                        $scope.bucket.rows.splice(index, 1);
+                        break;
+                    }
+                }
+            }).catch(function (reason) {
+                alert('Unable to delete bucket ' + bucket + ' from database ' + $scope.bucket.databaseSelected + ' because ' + JSON.stringify(reason));
+            });
+
+
+            /*
             $http( {
                 method: 'DELETE',
                 url: encodeURI($scope.baseAPIurl + '/' + $scope.bucket.databaseSelected + '/' + bucket)
@@ -74,6 +87,7 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
                 }).
                 error(function(data, status, headers, config) {
                 });
+                */
         }
 
         /**
@@ -81,6 +95,27 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
          * @param bucketName
          */
         $scope.create = function (bucketName, tab) {
+            Bucket.post({database:$scope.bucket.databaseSelected, bucket:bucketName}, null).$promise.then(function (data) {
+                $scope.bucket.rows.push({name:bucketName, count:0});
+
+                if (tab) {
+                    setTimeout(function () {
+                        $scope.$apply(function () {
+                            $scope.bucket.model.newRowAddedFocus = $scope.bucket.model.newRowAdded = true;
+                        })
+                    },100);
+                } else {
+                    $scope.bucket.model.newRowAddedFocus = $scope.bucket.model.newRowAdded = false;
+                    $location.path($scope.urlBasePath + '/' + $scope.bucket.databaseSelected + '/' + bucketName);
+                }
+                $scope.bucket.model = '';
+            }).catch(function (reason) {
+                $scope.bucket.model.newRowAddedFocus = $scope.bucket.model.newRowAdded = false;
+                $scope.bucket.model = '';
+                alert('Unable to delete bucket ' + bucketName + ' from database ' + $scope.bucket.databaseSelected + ' because ' + JSON.stringify(reason));
+            });
+
+            /*
             $http( {
                     method: 'POST',
                     url: encodeURI($scope.baseAPIurl + '/' + $scope.bucket.databaseSelected + '/' + bucketName)
@@ -104,8 +139,16 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
                 $scope.bucket.model.newRowAddedFocus = $scope.bucket.model.newRowAdded = false;
                 $scope.bucket.model = '';
             });
+            */
         };
 
+        Bucket.list({database:$scope.bucket.databaseSelected}).$promise.then(function (data) {
+            $scope.bucket.rows = data.buckets;
+        }).catch(function (reason) {
+            $scope.bucket.rows = [];
+            alert('Unable to get bucket list from database ' + $scope.bucket.databaseSelected + ' because ' + JSON.stringify(reason));
+        });
+        /*
         $http( {
             method: 'GET',
             url: encodeURI($scope.baseAPIurl + '/' + $scope.bucket.databaseSelected)
@@ -116,6 +159,8 @@ angular.module('nosqliteBucketControllers', ['nosqliteServices', 'nosqliteModels
         error(function(data, status, headers, config) {
             $scope.bucket.rows = [];
         });
+        */
+
         breadcrumbsService.set('breadcrumbsID', [
             {
                 href: '#' + $scope.urlBasePath,

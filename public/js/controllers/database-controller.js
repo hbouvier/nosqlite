@@ -1,5 +1,5 @@
 angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
-    .controller('DatabaseCtrl', function($scope, $http, $location, breadcrumbsService, DatabaseModel) {
+    .controller('DatabaseCtrl', function($scope, $location, breadcrumbsService, Database, DatabaseModel) {
         $scope.database = {
             addRowOnEnter : true,
             name  : '',
@@ -33,15 +33,13 @@ angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
         };
 
         $scope.create = function (name, tab) {
+            console.log('DATABASE:POST:', name);
             if ($scope.database.rows[name])
                 return;
-            $http( {
-                    method: 'POST',
-                    url: encodeURI($scope.baseAPIurl + '/' + name)
-            }).
-            success(function(data, status, headers, config) {
-                $scope.database.rows[name] = {name:name, selected:$scope.database.allSelected};
-                fetchBuckets(name);
+            Database.post({database:name}, {}).$promise.then(function (data) {
+                //$scope.database.rows[name] = {name:name, selected:$scope.database.allSelected};
+                //fetchBuckets(name);
+                $scope.database.rows[name] = data.databases[name];
                 if (tab) {
                     setTimeout(function () {
                         $scope.$apply(function () {
@@ -53,31 +51,26 @@ angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
                     $location.path($scope.urlBasePath + '/' + name);
                 }
                 $scope.database.name = '';
-
-            }).
-            error(function(data, status, headers, config) {
-                    $scope.database.model.newRowAddedFocus = $scope.database.model.newRowAdded = false;
+            }).catch(function (reason) {
+                alert('Unable to create the database ' + name + ' because ' + JSON.stringify(reason));
+                $scope.database.model.newRowAddedFocus = $scope.database.model.newRowAdded = false;
                 $scope.database.name = '';
             });
         };
 
-        $http( {
-                method: 'GET',
-                url: encodeURI($scope.baseAPIurl)
-        }).
-        success(function(data, status, headers, config) {
-            data.databases.forEach(function(database){
-                $scope.database.rows[database] = {
-                    name:database,
-                    selected:$scope.database.allSelected
-                };
-                fetchBuckets(database);
-            });
-        }).
-        error(function(data, status, headers, config) {
-            $scope.database.rows = [];
+        console.log('DATABASE:query:');
+        /** list()
+         *    databases = { 'dbName'   : { name:'dbName',  selected:false },
+                            'otherDb'  : { name:'otherDb', selected:false },
+                             $promise  : promise,
+                             $resolved : true }
+         */
+        Database.list().$promise.then(function (databases) {
+            $scope.database.rows = databases.databases;
+        }).catch(function (reason) {
+            alert('An error occurred while fetching the database list: ' +  JSON.stringify(reason));
+            $scope.database.rows = {};
         });
-
 
         $scope.addRow = function () {
             $scope.database.model.newRowAdded = true;
@@ -103,29 +96,23 @@ angular.module('nosqliteControllers', ['nosqliteServices', 'nosqliteModels'])
 
 
         function fetchBuckets(database) {
-            $http( {
-                    method: 'GET',
-                    url: encodeURI($scope.baseAPIurl + '/' + database)
-            }).
-            success(function(data, status, headers, config) {
-                $scope.database.rows[database].buckets = data.buckets;
-            }).
-            error(function(data, status, headers, config) {
+            console.log('BUCKET:GET:', database);
+            Database.get({database:database}).$promise.then(function (response) {
+                console.log('bucket:', database, ', length:', response.buckets.length)
+                $scope.database.rows[database].buckets = response.buckets;
+            }).catch(function (reason) {
+                alert('An error occurred while fetching the buckets for database ' + database + ' because: ' +  JSON.stringify(reason));
                 $scope.database.rows[database].buckets = [];
             });
-
         }
         function deleteDatabase(database) {
-            $http( {
-                method: 'DELETE',
-                url: encodeURI($scope.baseAPIurl + '/' + database)
-            }).
-                success(function(data, status, headers, config) {
-                    delete $scope.database.rows[database];
-                }).
-                error(function(data, status, headers, config) {
-                });
-
+            console.log('DATABASE:DELETE:', database);
+            Database.delete({database:database}).$promise.then(function () {
+                delete $scope.database.rows[database];
+            }).catch(function (reason) {
+                alert('An error occurred while deleting the database ' + database + ' because: ' +  JSON.stringify(reason));
+                $scope.database.rows[database].buckets = [];
+            });
         }
         function updateBreadcrumbs() {
             breadcrumbsService.set('breadcrumbsID', [

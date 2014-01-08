@@ -1,5 +1,5 @@
 angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServices'])
-    .controller('DocumentCtrl', function($scope, $routeParams, $http, $location, breadcrumbsService, DocumentModel) {
+    .controller('DocumentCtrl', function($scope, $routeParams, Document, $location, breadcrumbsService, DocumentModel) {
         $scope.document = {
             databaseSelected : $routeParams.database,
             bucketSelected   : $routeParams.bucket,
@@ -169,8 +169,39 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
         };
 
         function find(key) {
+            var params = {
+                database : $scope.document.databaseSelected,
+                bucket   : $scope.document.bucketSelected,
+                document : (key ? key  : '*'),
+                exact    : (key ? true : false)
+            };
+            if (key) {
+                Document().get(params).$promise.then(function (data) {
+                    $scope.document.rows = [data];
+                    $scope.document.documentSelected = data.key;
+                    setPageContent(data);
+                }).catch(function (reason) {
+                    $scope.document.rows = [];
+                    $scope.document.documentSelected = undefined;
+                    alert('Unable to get document from database because ' + JSON.stringify(reason));
+                });
+
+            } else {
+                params.offset = $scope.document.model.offset;
+                params.limit  = $scope.document.model.limit;
+                Document().list(params).$promise.then(function (data) {
+                    $scope.document.rows = data;
+                }).catch(function (reason) {
+                    $scope.document.rows = [];
+                    $scope.document.documentSelected = undefined;
+                    alert('Unable to get document from database because ' + JSON.stringify(reason));
+                });
+            }
+
+            /*
             var url = encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' +
                 (key ? key + '?exact=true' : ('*?exact=false&offset=' + $scope.document.model.offset + '&limit=' +  $scope.document.model.limit)));
+
             $http( {
                 method: 'GET',
                 url: url
@@ -188,6 +219,7 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                     $scope.document.rows = [];
                     $scope.document.documentSelected = undefined;
                 });
+             */
         };
 
         function updateBreadcrumbs() {
@@ -219,6 +251,21 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
          * @param bucket
          */
         function deleteDocument(document) {
+            Document().delete({
+                database : $scope.document.databaseSelected,
+                bucket   : $scope.document.bucketSelected,
+                document : JSON.stringify(document.key)
+            }).$promise.then(function (data) {
+                for (var index = 0 ; index < $scope.document.rows.length ; ++index) {
+                    if ($scope.document.rows[index].key === document.key) {
+                        $scope.document.rows.splice(index, 1);
+                        break;
+                    }
+                }
+            }).catch(function (reason) {
+                alert('Unable to delete documents from database ' + $scope.bucket.databaseSelected + '/' + $scope.document.bucketSelected + ' because ' + JSON.stringify(reason));
+            });
+            /*
             $http( {
                 method: 'DELETE',
                 url: encodeURI($scope.baseAPIurl + '/' + $scope.document.databaseSelected + '/' + $scope.document.bucketSelected + '/' + JSON.stringify(document.key))
@@ -233,6 +280,7 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                 }).
                 error(function(data, status, headers, config) {
                 });
+                */
         }
 
         /**
@@ -257,6 +305,41 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
          * REST call to save a document
          */
         function save() {
+            var params = {
+                database : $scope.document.databaseSelected,
+                bucket   : $scope.document.bucketSelected,
+                document : typeof($scope.document.content.key) === 'object' ? JSON.stringify($scope.document.content.key) : $scope.document.content.key
+            };
+            console.log('save:content-type=', $scope.document.content.contentType);
+            Document($scope.document.content.contentType).put(params, $scope.document.content.value).$promise.then(function (data) {
+                var found = false;
+                for (var i = 0 ; i < $scope.document.rows.length ; ++i) {
+                    if ($scope.document.rows[i].key.id === data.key.id) {
+                        $scope.document.rows[i] = data;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    $scope.document.rows.push(data);
+                }
+                $scope.document.content = data;
+                if ($scope.document.documentSelected) {
+                    $location.path(
+                        $scope.urlBasePath
+                            + '/' + $scope.document.databaseSelected
+                            + '/' + $scope.document.bucketSelected
+                        // + '/' + JSON.stringify(data.key)
+                    );
+                } else {
+                    $('#editDocumentModal').modal('hide');
+                }
+            }).catch(function (reason) {
+                alert('Unable to save document into database ' + $scope.bucket.databaseSelected + '/' + $scope.document.bucketSelected + ' because ' + JSON.stringify(reason));
+            });
+
+
+            /*
             var key = typeof($scope.document.content.key) === 'object' ? JSON.stringify($scope.document.content.key) : $scope.document.content.key;
             $scope.document.json = $scope.document.json === true ? true : $scope.document.json === false ? false : $scope.isValidJSON($scope.document.content.value);
             $http( {
@@ -299,6 +382,7 @@ angular.module('nosqliteDocumentControllers', ['nosqliteModels', 'nosqliteServic
                 error(function(data, status, headers, config) {
                     alert('ERROR');
                 });
+                */
         };
         function JSONprettify(json) {
             if (typeof json != 'string') {

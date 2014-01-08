@@ -1,5 +1,7 @@
+// To have one place where we define both the 'url' use in the javascript pages and the routes (because the
+// $routeProvider cannot use the $rootScope, we have to define a global (beuark) variable here.
 var ___g_NoSQLiteRoutePrefix___ = '/home';
-angular.module('nosqliteApplication', ['nosqliteServices', 'nosqliteControllers', 'nosqliteBucketControllers', 'nosqliteDocumentControllers'])
+angular.module('nosqliteApplication', ['ngRoute', 'nosqliteServices', 'nosqliteControllers', 'nosqliteBucketControllers', 'nosqliteDocumentControllers'])
     .run(function ($rootScope) {
         $rootScope.baseAPIurl = '/api/v1';
         $rootScope.baseUIurl = '/';
