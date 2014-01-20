@@ -2,7 +2,7 @@
     "author"      : "Henri Bouvier",
     "name"        : "nosqlited",
     "description" : "A nosql light database",
-    "version"     : "0.0.9",
+    "version"     : "0.0.10",
     "keywords": [
         "nosql",
         "database",
@@ -26,10 +26,11 @@
         "node-options" : "0.0.3"
     },
     "devDependencies": {
-        "jasmine-node": "latest",
-        "istanbul": "latest",
+        "jasmine-node"      : "latest",
+        "istanbul"          : "latest",
+	"coveralls"         : "2.6.1",
         "complexity-report" : "latest",
-        "jslint" : "latest"
+        "jslint"            : "latest"
     },
     "engines"              : {
         "node" : ">= 0.10.0 < 0.11.0"
