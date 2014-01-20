@@ -23,13 +23,11 @@
         "sqlite3" : "2.2.0",
         "winston" : "0.7.2",
         "node-uuid" : "1.4.1",
-        "node-options" : "0.0.2"
+        "node-options" : "0.0.3"
     },
     "devDependencies": {
         "jasmine-node": "latest",
         "istanbul": "latest",
-        "jscoverage" : "latest",
-        "jscoverage-reporter" : "latest",
         "complexity-report" : "latest",
         "jslint" : "latest"
     },
@@ -38,7 +36,8 @@
     },
     "scripts": {
         "start": "bin/nosqlited",
-        "test" : "istanbul cover jasmine-node -- spec && cr --maxcc 15 lib/nosqlite.js",
+	"test" : "cr --maxcc 15 lib/nosqlite.js && istanbul cover jasmine-node -- spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+        "istanbul-test" : "istanbul cover jasmine-node -- spec && cr --maxcc 15 lib/nosqlite.js",
         "verbose-test" : "jasmine-node --verbose spec",
         "autotest" : "jasmine-node --autotest spec --watch .",
         "lint"     : "jslint lib/*",

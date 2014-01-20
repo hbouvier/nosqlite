@@ -1,4 +1,4 @@
-NoSQLiteD [![Build Status](https://travis-ci.org/hbouvier/nosqlite.png)](https://travis-ci.org/hbouvier/nosqlite)
+NoSQLiteD [![Build Status](https://travis-ci.org/hbouvier/nosqlite.png)](https://travis-ci.org/hbouvier/nosqlite) [![Coverage Status](https://coveralls.io/repos/hbouvier/nosqlite/badge.png)](https://coveralls.io/r/hbouvier/nosqlite)
 ========
 
 # Yet another NoSQL implementation
