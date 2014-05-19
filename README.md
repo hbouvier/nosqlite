@@ -3,7 +3,7 @@ NoSQLiteD
 [![Coverage Status](https://coveralls.io/repos/hbouvier/nosqlite/badge.png)](https://coveralls.io/r/hbouvier/nosqlite)
 [![dependency Status](https://david-dm.org/hbouvier/nosqlite/status.png?theme=shields.io)](https://david-dm.org/hbouvier/nosqlite#info=dependencies)
 [![devDependency Status](https://david-dm.org/hbouvier/nosqlite/dev-status.png?theme=shields.io)](https://david-dm.org/hbouvier/nosqlite#info=devDependencies)
-[![NPM version](https://badge.fury.io/js/nosqlited.png)(http://badge.fury.io/js/nosqlited)
+[![NPM version](https://badge.fury.io/js/nosqlited.png)](http://badge.fury.io/js/nosqlited)
 
 ========
 
