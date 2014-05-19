@@ -1,4 +1,10 @@
-NoSQLiteD [![Build Status](https://travis-ci.org/hbouvier/nosqlite.png)](https://travis-ci.org/hbouvier/nosqlite) [![Coverage Status](https://coveralls.io/repos/hbouvier/nosqlite/badge.png)](https://coveralls.io/r/hbouvier/nosqlite)
+NoSQLiteD 
+[![Build Status](https://travis-ci.org/hbouvier/nosqlite.png)](https://travis-ci.org/hbouvier/nosqlite)
+[![Coverage Status](https://coveralls.io/repos/hbouvier/nosqlite/badge.png)](https://coveralls.io/r/hbouvier/nosqlite)
+[![dependency Status](https://david-dm.org/hbouvier/nosqlite/status.png?theme=shields.io)](https://david-dm.org/hbouvier/nosqlite#info=dependencies)
+[![devDependency Status](https://david-dm.org/hbouvier/nosqlite/dev-status.png?theme=shields.io)](https://david-dm.org/hbouvier/nosqlite#info=devDependencies)
+[![NPM version](https://badge.fury.io/js/nosqlited.png)(http://badge.fury.io/js/nosqlited)
+
 ========
 
 # Yet another NoSQL implementation
